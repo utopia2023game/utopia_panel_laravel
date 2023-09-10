@@ -1,0 +1,4 @@
+php artisan serve
+npm i
+npm run dev
+php artisan make:model -m -c -f -s Category
