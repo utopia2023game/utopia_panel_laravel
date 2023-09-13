@@ -103,17 +103,32 @@ class CustomerController extends BaseController
         $input = $request->all();
         // return $input;
 
+        $res = [];
+        $res['data'] = [];
+
         Helper::DBConnection('utopia_store_' . $input['idb']);
 
         $customer = Customer::where('mobile', $input['mobile'])->first();
 
-        if ($customer!='' && Hash::check($input['password'], $customer->password)) {
-            $customer->update(['remember_token' => $input['remember_token']]);
-            return 1;
-        }else{
-            return 0;
+        
+        if ($customer->status == 1) {
+            if ($customer!='' && Hash::check($input['password'], $customer->password)) {
+                $customer->update(['remember_token' => $input['remember_token']]);
+                $res['result'] = true;
+                $res['message'] = 'success';
+                $res['data'] = $customer;
+            }else{
+                $res['result'] = false;
+                $res['message'] = 'password';
+            }
+        } else {
+            $res['result'] = false;
+            $res['message'] = 'status';
+            $res['status'] = $customer->status;
         }
+        // dd( $res);
 
+        return $res;
     }
 
     public function loginMobileSendCode()

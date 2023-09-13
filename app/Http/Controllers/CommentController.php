@@ -68,12 +68,15 @@ class CommentController extends Controller
 
         $conut = 0;
         for ($i = 0; $i < count($ids); $i++) {
-            $comment = Comment::find($ids[$i]);
+            $comment = Comment::where('id', $ids[$i])->first();
 
-            $comment = $comment->update([
-                'status' => $input['status'],
-                'submit_user_id' => $input['submit_user_id'],
-            ]);
+            if (Comment::where('id', $ids[$i])->exists()) {
+                $comment = $comment->update([
+                    'status' => $input['status'],
+                    'submit_user_id' => $input['submit_user_id'],
+                ]);
+            }
+
 
             $comment > 0 ? $conut = $conut + 1 : null;
         }

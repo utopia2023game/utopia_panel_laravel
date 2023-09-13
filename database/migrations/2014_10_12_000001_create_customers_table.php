@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamp('mobile_verified_at')->nullable();
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('pic_profile')->nullable();
             $table->string('password');
             $table->string('birth');
             $table->string('gender');

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\SliderController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -58,6 +59,15 @@ Route::post('store_list', [StoreController::class, 'storeList'])->name('storeLis
 
 
 
+
+Route::post('message_create', [MessageController::class, 'MessageCreate'])->name('MessageCreate');
+Route::post('message_update', [MessageController::class, 'updateMessage'])->name('updateMessage');
+Route::post('list_messages', [MessageController::class, 'listMessages'])->name('listMessages');
+Route::post('message_soft_delete', [MessageController::class, 'softdelete'])->name('softdelete');
+Route::post('message_force_delete', [MessageController::class, 'forcedelete'])->name('forcedelete');
+Route::post('message_restore', [MessageController::class, 'restore'])->name('restore');
+Route::post('set_visit_message', [MessageController::class, 'setVisitMessage'])->name('setVisitMessage');
+Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
 
 Route::post('set_images_slider', [SliderController::class, 'setImagesSlider'])->name('setImagesSlider');
 Route::post('list_sliders', [SliderController::class, 'listSliders'])->name('listSliders');
