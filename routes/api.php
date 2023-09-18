@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MessageController;
@@ -68,6 +69,16 @@ Route::post('message_force_delete', [MessageController::class, 'forcedelete'])->
 Route::post('message_restore', [MessageController::class, 'restore'])->name('restore');
 Route::post('set_visit_message', [MessageController::class, 'setVisitMessage'])->name('setVisitMessage');
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
+
+Route::post('address_create', [AddressController::class, 'AddressCreate'])->name('AddressCreate');
+Route::post('address_update', [AddressController::class, 'updateAddress'])->name('updateAddress');
+Route::post('list_address', [AddressController::class, 'listAddresss'])->name('listAddresss');
+Route::post('data_address_by_priority', [AddressController::class, 'dataAddressByPriority'])->name('dataAddressByPriority');
+Route::post('address_soft_delete', [AddressController::class, 'softdelete'])->name('softdelete');
+Route::post('address_force_delete', [AddressController::class, 'forcedelete'])->name('forcedelete');
+Route::post('address_restore', [AddressController::class, 'restore'])->name('restore');
+Route::post('set_priority_address', [AddressController::class, 'setPriorityAddress'])->name('setPriorityAddress');
+Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->name('confirmAddress');
 
 Route::post('set_images_slider', [SliderController::class, 'setImagesSlider'])->name('setImagesSlider');
 Route::post('list_sliders', [SliderController::class, 'listSliders'])->name('listSliders');
