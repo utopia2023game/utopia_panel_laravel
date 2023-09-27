@@ -33,7 +33,7 @@ return new class extends Migration
             $table->boolean('confirm_discount')->default(0);
             $table->double('discount_percent')->nullable(true);
             $table->double('discount_manual')->nullable(true);
-            $table->boolean('confirm_discount_time')->default(0);
+            $table->double('discount_price')->default(0);
             $table->text('discount_time_from')->nullable(true);
             $table->text('discount_time_until')->nullable(true);
             $table->double('safe_discount_percent')->nullable(true);

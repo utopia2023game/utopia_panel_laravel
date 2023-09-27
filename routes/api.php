@@ -1,16 +1,19 @@
 <?php
 
-use App\Http\Controllers\AddressController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\SliderController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\SliderController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DeliveryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,10 +59,10 @@ Route::post('create_store_with_database_and_migrate', [Controller::class, 'creat
 Route::post('check_store_and_send_mobile_verify_code', [Controller::class, 'checkStoreAndSendMobileVerifyCode'])->name('checkStoreAndSendMobileVerifyCode');
 Route::post('login_mobile_password', [Controller::class, 'loginMobilePassword'])->name('loginMobilePassword');
 Route::post('login_overview_with_password', [Controller::class, 'loginMobileOverViewPasswordIdb'])->name('loginMobileOverViewPasswordIdb');
+
 Route::post('store_list', [StoreController::class, 'storeList'])->name('storeList');
 
-
-
+Route::post('send_order_cart', [OrderController::class, 'sendOrderCart'])->name('sendOrderCart');
 
 Route::post('message_create', [MessageController::class, 'MessageCreate'])->name('MessageCreate');
 Route::post('message_update', [MessageController::class, 'updateMessage'])->name('updateMessage');
@@ -79,6 +82,27 @@ Route::post('address_force_delete', [AddressController::class, 'forcedelete'])->
 Route::post('address_restore', [AddressController::class, 'restore'])->name('restore');
 Route::post('set_priority_address', [AddressController::class, 'setPriorityAddress'])->name('setPriorityAddress');
 Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->name('confirmAddress');
+Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
+
+Route::post('delivery_create', [DeliveryController::class, 'DeliveryCreate'])->name('DeliveryCreate');
+Route::post('delivery_update', [DeliveryController::class, 'updateDelivery'])->name('updateDelivery');
+Route::post('list_delivery', [DeliveryController::class, 'listDeliverys'])->name('listDeliverys');
+Route::post('data_delivery_by_priority', [DeliveryController::class, 'dataDeliveryByPriority'])->name('dataDeliveryByPriority');
+Route::post('delivery_soft_delete', [DeliveryController::class, 'softdelete'])->name('softdelete');
+Route::post('delivery_force_delete', [DeliveryController::class, 'forcedelete'])->name('forcedelete');
+Route::post('delivery_restore', [DeliveryController::class, 'restore'])->name('restore');
+Route::post('set_priority_delivery', [DeliveryController::class, 'setPriorityDelivery'])->name('setPriorityDelivery');
+Route::post('confirm_delivery', [DeliveryController::class, 'confirmDelivery'])->name('confirmDelivery');
+
+Route::post('bank_create', [BankController::class, 'BankCreate'])->name('BankCreate');
+Route::post('bank_update', [BankController::class, 'updateBank'])->name('updateBank');
+Route::post('list_bank', [BankController::class, 'listBanks'])->name('listBanks');
+Route::post('data_bank_by_priority', [BankController::class, 'dataBankByPriority'])->name('dataBankByPriority');
+Route::post('bank_soft_delete', [BankController::class, 'softdelete'])->name('softdelete');
+Route::post('bank_force_delete', [BankController::class, 'forcedelete'])->name('forcedelete');
+Route::post('bank_restore', [BankController::class, 'restore'])->name('restore');
+Route::post('set_priority_bank', [BankController::class, 'setPriorityBank'])->name('setPriorityBank');
+Route::post('confirm_bank', [BankController::class, 'confirmBank'])->name('confirmBank');
 
 Route::post('set_images_slider', [SliderController::class, 'setImagesSlider'])->name('setImagesSlider');
 Route::post('list_sliders', [SliderController::class, 'listSliders'])->name('listSliders');

@@ -22,7 +22,7 @@ class AddressController extends Controller
         $a['receiver_mobile'] = $input['receiver_mobile'];
         $a['receiver_post_code'] = $input['receiver_post_code'];
         $a['receiver_address'] = $input['receiver_address'];
-        $a['priority'] = 1 ;
+        $a['priority'] = 1;
 
         $this->clearOtherPriority($input['customer_id']);
 
@@ -38,7 +38,8 @@ class AddressController extends Controller
         return 1;
     }
 
-    public function clearOtherPriority($customerId){
+    public function clearOtherPriority($customerId)
+    {
         $Address = Address::where('customer_id', $customerId)->get();
 
         if (Address::where('customer_id', $customerId)->exists()) {
@@ -112,15 +113,15 @@ class AddressController extends Controller
         if (Address::where('id', $input['id'])->exists()) {
 
             $this->clearOtherPriority($input['customer_id']);
-            Address::where('id', $input['id'])->update(['priority'=> 0]);
+            Address::where('id', $input['id'])->update(['priority' => 0]);
             Address::where('id', $input['id'])->delete();
 
             if (Address::where('customer_id', $input['customer_id'])->exists()) {
-                Address::where('customer_id', $input['customer_id'])->orderBy('created_at', 'desc')->first()->update(['priority'=> 1]);
+                Address::where('customer_id', $input['customer_id'])->orderBy('created_at', 'desc')->first()->update(['priority' => 1]);
             }
-            
 
-            
+
+
             return 1;
         } else {
             return 0;
@@ -164,9 +165,8 @@ class AddressController extends Controller
 
         $Address = Address::where('customer_id', $input['customer_id'])->get();
 
+        $counter = 0;
         if (Address::where('customer_id', $input['customer_id'])->exists()) {
-
-            $counter = 0;
             for ($i = 0; $i < count($Address); $i++) {
                 $priority = 0;
                 // echo 'address id => ' . $Address[$i]['id'] . '    id => ' . $input['id'] . "\n";

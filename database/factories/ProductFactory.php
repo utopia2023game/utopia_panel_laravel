@@ -38,7 +38,7 @@ class ProductFactory extends Factory
             'confirm_discount' => rand(0,1),
             'discount_percent' => rand(0,30),
             'discount_manual' => rand(0,30),
-            'confirm_discount_time' => rand(0,1),
+            'discount_price' => rand(0,1),
             'discount_time_from' => now(),
             'discount_time_until' => now(),
             'safe_discount_percent' => rand(5,10),

@@ -41,7 +41,7 @@ class ProductController extends Controller
         $data['confirm_discount'] = $input['confirm_discount'];
         $data['discount_percent'] = $input['discount_percent'];
         $data['discount_manual'] = $input['discount_manual'];
-        $data['confirm_discount_time'] = $input['confirm_discount_time'];
+        $data['discount_price'] = $input['discount_price'];
         $data['discount_time_from'] = $input['discount_time_from'];
         $data['discount_time_until'] = $input['discount_time_until'];
         $data['safe_discount_percent'] = $input['safe_discount_percent'];
@@ -141,7 +141,7 @@ class ProductController extends Controller
         $data['confirm_discount'] = $input['confirm_discount'];
         $data['discount_percent'] = $input['discount_percent'];
         $data['discount_manual'] = $input['discount_manual'];
-        $data['confirm_discount_time'] = $input['confirm_discount_time'];
+        $data['discount_price'] = $input['discount_price'];
         $data['discount_time_from'] = $input['discount_time_from'];
         $data['discount_time_until'] = $input['discount_time_until'];
         $data['safe_discount_percent'] = $input['safe_discount_percent'];
@@ -377,6 +377,10 @@ class ProductController extends Controller
 
         $product = Product::find($request->id);
 
+        Helper::updatingProductsPrice($product);
+
+        // return 'end';
+
         $categories = json_decode($product->categories_id);
         $a = array();
         for ($i = 0; $i < count($categories); $i++) {
@@ -425,6 +429,8 @@ class ProductController extends Controller
         $products = Product::orderBy('id', 'DESC')->get();
 
         for ($i = 0; $i < count($products); $i++) {
+            Helper::updatingProductsPrice($products[$i]);
+            
             $a = Media::where('product_id', $products[$i]['id'])->where('priority', 1)->where('type', 'image')->first();
             if ($a == null) {
                 $a = Media::where('product_id', $products[$i]['id'])->where('type', 'image')->first();
@@ -450,6 +456,7 @@ class ProductController extends Controller
         for ($i = 0; $i < count($ids); $i++) {
             $product = Product::find($ids[$i]);
 
+            Helper::updatingProductsPrice($product);
             // echo 'product  => ' . empty($product) . "\n";
 
             if (!empty($product)) {
@@ -481,29 +488,6 @@ class ProductController extends Controller
 
         return $product;
     }
-
-    // public function category($categories = [2, 3])
-    // {
-    //     // query one
-    //     //explode the categories name by ',', and then list all categories id by match name...
-
-    //     // $categories = explode(',', $categories);
-
-    //     // //query two
-    //     // foreach ($categories as $category) {
-    //     //     $this->builder->whereHas('categories', function ($query) use ($category) {
-    //     //         return $query->where('category_id', $category);
-    //     //     });
-    //     // }
-
-
-    //     $categories = explode(',', $categories);
-
-    //     $data['articles'] = Article::whereHas('categories', function ($query) use ($categories) {
-    //         $query->whereIn('category_id', $categories)->where('premium', 0);
-    //     })->get();
-    // }
-
 
     // public function search(Request $request){
     //     $categories = Category::all();

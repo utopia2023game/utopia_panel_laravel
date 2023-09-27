@@ -219,6 +219,8 @@ class CategoryController extends Controller
 
         $items[2] = array();
         for ($i = 0; $i < count($products); $i++) {
+            Helper::updatingProductsPrice($products[$i]);
+
             $categories_id = json_decode($products[$i]->categories_id);
             for ($j = 0; $j < count($categories_id); $j++) {
                 $cat_id[$j] = $this->getParentIdCategoriesById($categories_id[$j]);
