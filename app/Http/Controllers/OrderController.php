@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Exception;
 use Throwable;
 use App\Models\Bank;
+use App\Models\Media;
 use App\Models\Order;
 use App\Helpers\Helper;
 use App\Models\Address;
@@ -57,9 +58,33 @@ class OrderController extends Controller
                                         $input['delivery_id'] = $input['delivery_type_id'];
                                         unset($input['delivery_type_id']);
 
-                                        $input['status'] = 'paying';
-                                        // return $input;
-                                        Order::create($input);
+                                        $input['order_code'] = Helper::generateUniqueCode();
+                                        if ($input['status'] == 'checking') {
+                                            $input['status'] = 'paying';
+
+                                            $product_id = json_decode($input['product_id']);
+
+
+                                            $a = '';
+                                            for ($i = 0; $i < count($product_id); $i++) {
+
+                                                $a .=  '"' . Product::where('id', $product_id[$i])->value('title')  . '"';
+
+                                                $i + 1 != count($product_id) ? $a .= ',' : null;
+                                            }
+
+                                            $input['product_name'] = '[' . $a . ']';
+
+
+                                            $address = Address::where('id', $input['address_id'])->first();
+                                            $input['address_receiver_name'] = $address->receiver_name;
+                                            $input['address_receiver_mobile'] = $address->receiver_mobile;
+                                            $input['address_receiver_address'] = $address->receiver_address;
+                                            $input['address_receiver_post_code'] = $address->receiver_post_code;
+
+                                            // return $input;
+                                            Order::create($input);
+                                        }
 
                                         $bank = Bank::where('id', $bid)->first();
                                         $result['result'] = true;
@@ -593,13 +618,74 @@ class OrderController extends Controller
             $product->update($a);
         }
     }
-    // public function checkingProductsCount($input){
 
-    //     $allCountProducts = $input['all_count_products'];
-    //     $product_id = $input['product_id'];
-    //     $count_selected = $input['count_selected'];
-    //     $sale_price = $input['sale_price'];
-    //     $discount_price = $input['discount_price'];
-    // }
+    public function listOrders()
+    {
+        $input = Request()->all();
+
+        Helper::DBConnection('utopia_store_' . $input['idb']);
+
+        $Order = Order::where('customer_id', $input['customer_id'])->where('status', $input['status'])->get();
+
+        for ($i = 0; $i < count($Order); $i++) {
+            $ids = json_decode($Order[$i]['product_id']);
+            $b['product_image'] = array();
+            // $d = '';
+            for ($j = 0; $j < count($ids); $j++) {
+                // echo $ids[$j] . "\n";
+                $a = '';
+                if (Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
+                    $res = Media::where('product_id', $ids[$j])->where('type', 'image')->where('priority', 1)->first();
+                    $a = $res->path;
+                }
+
+                if ($a == '' && Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
+                    $res = Media::where('product_id', $ids[$j])->where('type', 'image')->first();
+                    $a = $res->path;
+                }
+                array_push($b['product_image'], $a);
+
+                
+                // $d .= '"' . Product::where('id', $ids[$j])->value('title') . '"';
+    
+                // $j + 1 == count($ids) ? null : $d .= ',';
+            }
+            $Order[$i]['product_image'] = $b['product_image'];
+
+
+            
+            
+            // $c['product_name'] = '[' . $d . ']';
+            // Order::where('id', $Order[$i]['id'])->update($c);
+        }
+
+        
+
+
+        
+
+        
+
+        return $Order;
+    }
+
+    public function changeStatus(Request $request)
+    {
+        $input = $request->all();
+
+        $id = $input['id'];
+
+        Helper::DBConnection('utopia_store_' . $input['idb']);
+
+        $Order = Order::where('id', $id)->first();
+
+        if (Order::where('id', $id)->exists()) {
+            $Order = $Order->update([
+                'status' => $input['status'],
+            ]);
+        }
+
+        return $Order;
+    }
 
 }

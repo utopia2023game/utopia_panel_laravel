@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use PDO;
+use App\Models\Order;
 use App\Models\SmsLogon;
 use App\Models\Employees;
 use Hekmatinasser\Verta\Verta;
@@ -338,4 +339,29 @@ class Helper
             return $discountPrice;
         }
     }
+
+
+    public static function generateUniqueCode()
+{
+
+    $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    // $characters = '0123456789';
+    $charactersNumber = strlen($characters);
+    // $codeLength = 12;
+
+    $code = '';
+
+    while (strlen($code) < 12) {
+        $position = rand(0, $charactersNumber - 1);
+        $character = $characters[$position];
+        $code = $code.$character;
+    }
+
+    if (Order::where('order_code', $code)->exists()) {
+        Helper::generateUniqueCode();
+    }
+
+    return $code;
+
+}
 }

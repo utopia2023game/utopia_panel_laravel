@@ -63,6 +63,8 @@ Route::post('login_overview_with_password', [Controller::class, 'loginMobileOver
 Route::post('store_list', [StoreController::class, 'storeList'])->name('storeList');
 
 Route::post('send_order_cart', [OrderController::class, 'sendOrderCart'])->name('sendOrderCart');
+Route::post('list_order', [OrderController::class, 'listOrders'])->name('listOrders');
+Route::post('change_status', [OrderController::class, 'changeStatus'])->name('changeStatus');
 
 Route::post('message_create', [MessageController::class, 'MessageCreate'])->name('MessageCreate');
 Route::post('message_update', [MessageController::class, 'updateMessage'])->name('updateMessage');
