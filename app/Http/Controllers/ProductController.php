@@ -18,7 +18,7 @@ class ProductController extends Controller
 
         // return $input;
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $data = array();
 
@@ -118,7 +118,7 @@ class ProductController extends Controller
         $input = $request->all();
         $product_id = $input['id'];
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $data = array();
 
@@ -319,7 +319,7 @@ class ProductController extends Controller
 
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
         // $request->validate([
         //     'id' => 'nullable|numeric'
         // ]);
@@ -333,7 +333,7 @@ class ProductController extends Controller
 
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
         // $request->validate([
         //     'id' => 'nullable|numeric'
         // ]);
@@ -351,7 +351,7 @@ class ProductController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         // $request->validate([
         //     'id' => 'nullable|numeric'
@@ -373,7 +373,7 @@ class ProductController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $product = Product::find($request->id);
 
@@ -424,7 +424,7 @@ class ProductController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $products = Product::orderBy('id', 'DESC')->get();
 
@@ -449,7 +449,7 @@ class ProductController extends Controller
 
         $ids = json_decode($input['id']);
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $products = array();
 
@@ -478,7 +478,7 @@ class ProductController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $product = Product::find($input['id']);
 

@@ -36,7 +36,7 @@ class StoreController extends Controller
             $storeCategory = CategoryStore::find($Store->category_id)->name;
             // echo $storeCategory;
 
-            Helper::DBConnection('utopia_store_' . $dbName);
+            Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
             $user = User::all()->where('mobile', $mobile )->first();
 

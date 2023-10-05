@@ -94,15 +94,14 @@ return [
         ],
 
         
-
-        '0_utopia_management' => [
+        env('SERVER_STATUS_PROVIDER' , '') . '0_utopia_management' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => '0_utopia_management',
-            'username' => 'root',
-            'password' => '',
+            'database' => env('SERVER_STATUS_PROVIDER' , '') .'0_utopia_management',
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
@@ -136,12 +135,12 @@ return [
         // ],
         
 
-        // 'utopia_store_0001' => [
+        // env('SERVER_STATUS' , '') . 'utopia_store_0001' => [
         //     'driver' => 'mysql',
         //     'url' => env('DATABASE_URL'),
         //     'host' => env('DB_HOST', '127.0.0.1'),
         //     'port' => env('DB_PORT', '3306'),
-        //     'database' => 'utopia_store_0001',
+        //     'database' => env('SERVER_STATUS' , '') . 'utopia_store_0001',
         //     'username' => 'root',
         //     'password' => '',
         //     'unix_socket' => env('DB_SOCKET', ''),

@@ -15,7 +15,7 @@ class AddressController extends Controller
 
         $idb = $input['idb'];
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $a['customer_id'] = $input['customer_id'];
         $a['receiver_name'] = $input['receiver_name'];
@@ -59,7 +59,7 @@ class AddressController extends Controller
         $idb = $input['idb'];
         $Address_id = $input['id'];
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $Address = Address::where('id', $Address_id)->first();
 
@@ -85,7 +85,7 @@ class AddressController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Address = Address::where('customer_id', $input['customer_id'])->orderBy('created_at', 'desc')->get();
 
@@ -96,7 +96,7 @@ class AddressController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Address = Address::where('customer_id', $input['customer_id'])->where('priority', 1)->first();
 
@@ -108,7 +108,7 @@ class AddressController extends Controller
         $input = Request()->all();
 
         // dd($input);
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         if (Address::where('id', $input['id'])->exists()) {
 
@@ -133,7 +133,7 @@ class AddressController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         Address::where('id', $input['id'])->restore();
 
@@ -150,7 +150,7 @@ class AddressController extends Controller
 
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $result = Address::where('id', $input['id'])->restore();
 
@@ -161,7 +161,7 @@ class AddressController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Address = Address::where('customer_id', $input['customer_id'])->get();
 
@@ -191,7 +191,7 @@ class AddressController extends Controller
 
         $ids = json_decode($input['id']);
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         // return $ids;
 

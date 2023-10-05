@@ -36,7 +36,7 @@ class CustomerController extends BaseController
     //         $storelogo = $Store->logo;
     //         $storeCategory = CategoryStore::find($Store->category_id)->name;
 
-    //         Helper::DBConnection('utopia_store_' . $dbName);
+    //         Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
     //         $user = User::all()->where('mobile', $input['mobile'])->first();
 
@@ -70,7 +70,7 @@ class CustomerController extends BaseController
     //             $storelogo = $Store->logo;
     //             $storeCategory = CategoryStore::find($Store->category_id)->name;
 
-    //             Helper::DBConnection('utopia_store_' . $dbName);
+    //             Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
     //             $user = User::all()->where('mobile', $input['mobile'])->first();
 
@@ -106,7 +106,7 @@ class CustomerController extends BaseController
         $res = [];
         $res['data'] = [];
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $customer = Customer::where('mobile', $input['mobile'])->first();
 
@@ -145,7 +145,7 @@ class CustomerController extends BaseController
         $input = $request->all();
         // return $input;
         
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $SmsCustomerLogon = SmsCustomerLogon::where('mobile', $input['mobile'])->first();
 
@@ -184,7 +184,7 @@ class CustomerController extends BaseController
     {
         $input = $request->all();
         // return $input;
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $customer = Customer::where('mobile', $input['mobile'])->get();
 

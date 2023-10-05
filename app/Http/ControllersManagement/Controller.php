@@ -19,11 +19,11 @@ class Controller extends BaseController
 
         // dd($request->dbName);
 
-        DB::statement('CREATE DATABASE IF NOT EXISTS ' . $request->dbName);
+        DB::statement('CREATE DATABASE IF NOT EXISTS ' . env('SERVER_STATUS' , '') . $request->dbName);
 
-        Helper::DBConnection($request->dbName);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . $request->dbName);
 
-        Artisan::call('migrate  --path=/database/migrations/management --database=' . $request->dbName);
+        Artisan::call('migrate  --path=/database/migrations/management --database=' . env('SERVER_STATUS' , '') . $request->dbName);
 
         return  1;
     }
@@ -33,7 +33,7 @@ class Controller extends BaseController
     //     // dd($request);
     //     Helper::DBConnection($request->dbName);
 
-    //     Artisan::call('migrate --database=utopia_store_' . $request->dbName);
+    //     Artisan::call('migrate --database=' . env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
         
     // }
 
@@ -50,9 +50,9 @@ class Controller extends BaseController
 
 
 //     public function rollBackByDataBaseName(Request $request){
-//         Helper::DBConnection('utopia_store_' . $request->dbName);
+//         Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
-//         Artisan::call('migrate:rollback --database=utopia_store_'.$request->dbName);
+//         Artisan::call('migrate:rollback --database=' . env('SERVER_STATUS' , '') . 'utopia_store_'.$request->dbName);
 //     }
 
 //     public function rollBackAllDataBase(Request $request){
@@ -67,9 +67,9 @@ class Controller extends BaseController
 
 
 //     public function migrateFreshByDataBaseName(Request $request){
-//         Helper::DBConnection('utopia_store_' . $request->dbName);
+//         Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
-//         Artisan::call('migrate:fresh --database=utopia_store_'.$request->dbName);
+//         Artisan::call('migrate:fresh --database=' . env('SERVER_STATUS' , '') . 'utopia_store_'.$request->dbName);
 //     }
 
 //     public function migrateFreshAllDataBase(Request $request){

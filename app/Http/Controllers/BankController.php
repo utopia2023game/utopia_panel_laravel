@@ -14,7 +14,7 @@ class BankController extends Controller
 
         $idb = $input['idb'];
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $Bank = Bank::all();
 
@@ -60,7 +60,7 @@ class BankController extends Controller
         $idb = $input['idb'];
         $Bank_id = $input['id'];
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $Bank = Bank::where('id', $Bank_id)->first();
 
@@ -86,7 +86,7 @@ class BankController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Bank = Bank::orderBy('priority', 'desc')->get();
 
@@ -97,7 +97,7 @@ class BankController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Bank = Bank::where('priority', 1)->first();
 
@@ -109,7 +109,7 @@ class BankController extends Controller
         $input = Request()->all();
 
         // dd($input);
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Bank = Bank::all();
 
@@ -137,7 +137,7 @@ class BankController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         Bank::where('id', $input['id'])->restore();
 
@@ -154,7 +154,7 @@ class BankController extends Controller
 
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $result = Bank::where('id', $input['id'])->restore();
 
@@ -165,7 +165,7 @@ class BankController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Bank = Bank::all();
         $counter = 0;
@@ -193,7 +193,7 @@ class BankController extends Controller
 
         $ids = json_decode($input['id']);
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         // return $ids;
 
@@ -218,7 +218,7 @@ class BankController extends Controller
 
     //     $idb = $input['idb'];
 
-    //     Helper::DBConnection('utopia_store_' . $idb);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
     //     $a['customer_id'] = $input['customer_id'];
     //     $a['receiver_name'] = $input['receiver_name'];
@@ -261,7 +261,7 @@ class BankController extends Controller
     //     $idb = $input['idb'];
     //     $Address_id = $input['id'];
 
-    //     Helper::DBConnection('utopia_store_' . $idb);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
     //     $Address = Address::where('id', $Address_id)->first();
 
@@ -287,7 +287,7 @@ class BankController extends Controller
     // {
     //     $input = Request()->all();
 
-    //     Helper::DBConnection('utopia_store_' . $input['idb']);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
     //     $Address = Address::where('customer_id', $input['customer_id'])->orderBy('created_at', 'desc')->get();
 
@@ -298,7 +298,7 @@ class BankController extends Controller
     // {
     //     $input = Request()->all();
 
-    //     Helper::DBConnection('utopia_store_' . $input['idb']);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
     //     $Address = Address::where('customer_id', $input['customer_id'])->where('priority', 1)->first();
 
@@ -310,7 +310,7 @@ class BankController extends Controller
     //     $input = Request()->all();
 
     //     // dd($input);
-    //     Helper::DBConnection('utopia_store_' . $input['idb']);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
     //     if (Address::where('id', $input['id'])->exists()) {
 
@@ -335,7 +335,7 @@ class BankController extends Controller
     // {
     //     $input = Request()->all();
 
-    //     Helper::DBConnection('utopia_store_' . $input['idb']);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
     //     Address::where('id', $input['id'])->restore();
 
@@ -352,7 +352,7 @@ class BankController extends Controller
 
     //     $input = Request()->all();
 
-    //     Helper::DBConnection('utopia_store_' . $input['idb']);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
     //     $result = Address::where('id', $input['id'])->restore();
 
@@ -363,7 +363,7 @@ class BankController extends Controller
     // {
     //     $input = $request->all();
 
-    //     Helper::DBConnection('utopia_store_' . $input['idb']);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
     //     $Address = Address::where('customer_id', $input['customer_id'])->get();
 
@@ -394,7 +394,7 @@ class BankController extends Controller
 
     //     $ids = json_decode($input['id']);
 
-    //     Helper::DBConnection('utopia_store_' . $input['idb']);
+    //     Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
     //     // return $ids;
 

@@ -19,7 +19,7 @@ class SliderController extends Controller
         // return $input;
         // dd($input);
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $file_name = rand(1000, 9999) . '_' . $file['detail']->getClientOriginalName();
         $destinationPath = 'uploads/' . $idb . '/' . $type . '/';
@@ -56,7 +56,7 @@ class SliderController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $sliders = Slider::orderBy('id', 'DESC')->get();
 
@@ -68,7 +68,7 @@ class SliderController extends Controller
         $input = Request()->all();
         
         // dd($input);
-        Helper::DBConnection( 'utopia_store_' . $input['idb']);
+        Helper::DBConnection( env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         if (Slider::where('id', $input['id'])->exists()) {
             Slider::where('id', $input['id'])->delete();
@@ -83,7 +83,7 @@ class SliderController extends Controller
     {
         $input = Request()->all();
         
-        Helper::DBConnection( 'utopia_store_' . $input['idb']);
+        Helper::DBConnection( env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         Slider::where('id', $input['id'])->restore();
 
@@ -100,7 +100,7 @@ class SliderController extends Controller
 
         $input = Request()->all();
         
-        Helper::DBConnection( 'utopia_store_' . $input['idb']);
+        Helper::DBConnection( env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $result = Slider::where('id', $input['id'])->restore();
 

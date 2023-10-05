@@ -41,7 +41,7 @@ class Controller extends BaseController
             $storelogo = $Store->logo;
             $storeCategory = CategoryStore::find($Store->category_id)->name;
 
-            Helper::DBConnection('utopia_store_' . $dbName);
+            Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
             $user = User::all()->where('mobile', $input['mobile'])->first();
 
@@ -75,7 +75,7 @@ class Controller extends BaseController
                 $storelogo = $Store->logo;
                 $storeCategory = CategoryStore::find($Store->category_id)->name;
 
-                Helper::DBConnection('utopia_store_' . $dbName);
+                Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
                 $user = User::all()->where('mobile', $input['mobile'])->first();
 
@@ -107,7 +107,7 @@ class Controller extends BaseController
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $user = User::all()->where('mobile', $input['mobile'])->first();
 
@@ -191,13 +191,13 @@ class Controller extends BaseController
 
             $dbName = Helper::back4Digits($users->id);
 
-            DB::statement('CREATE DATABASE IF NOT EXISTS utopia_store_' . $dbName);
+            DB::statement('CREATE DATABASE IF NOT EXISTS ' . env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
             DB::table('stores')->where('id', $users->id)->update(['db_name' => $dbName]);
 
-            Helper::DBConnection('utopia_store_' . $dbName);
+            Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
-            Artisan::call('migrate --database=utopia_store_' . $dbName);
+            Artisan::call('migrate --database=' . env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
 
             User::create([
                 'status' => '1',
@@ -252,9 +252,9 @@ class Controller extends BaseController
     public function migrateByDataBaseName(Request $request)
     {
         // dd($request);
-        Helper::DBConnection('utopia_store_' . $request->dbName);
+        Helper::DBConnection(env() .env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
-        Artisan::call('migrate --database=utopia_store_' . $request->dbName);
+        Artisan::call('migrate --database=' . env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
     }
 
@@ -272,9 +272,9 @@ class Controller extends BaseController
 
     public function rollBackByDataBaseName(Request $request)
     {
-        Helper::DBConnection('utopia_store_' . $request->dbName);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
-        Artisan::call('migrate:rollback --database=utopia_store_' . $request->dbName);
+        Artisan::call('migrate:rollback --database=' . env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
     }
 
     public function rollBackAllDataBase(Request $request)
@@ -291,9 +291,9 @@ class Controller extends BaseController
 
     public function migrateFreshByDataBaseName(Request $request)
     {
-        Helper::DBConnection('utopia_store_' . $request->dbName);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
-        Artisan::call('migrate:fresh --database=utopia_store_' . $request->dbName);
+        Artisan::call('migrate:fresh --database=' . env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
     }
 
     public function migrateFreshAllDataBase(Request $request)

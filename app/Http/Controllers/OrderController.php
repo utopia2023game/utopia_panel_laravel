@@ -32,7 +32,7 @@ class OrderController extends Controller
         // return $input;
         $idb = $input['idb'];
         $bid = $input['bid'];
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         try {
             $checkingCustomerExists = $this->checkingCustomerExists($input['customer_id']);
@@ -623,7 +623,7 @@ class OrderController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Order = Order::where('customer_id', $input['customer_id'])->where('status', $input['status'])->get();
 
@@ -675,7 +675,7 @@ class OrderController extends Controller
 
         $id = $input['id'];
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Order = Order::where('id', $id)->first();
 

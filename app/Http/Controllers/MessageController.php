@@ -20,7 +20,7 @@ class MessageController extends Controller
         // return $input;
         // dd($input);
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $a['submit_user_id'] = $input['submit_user_id'];
         $a['customer_id'] = $input['customer_id'];
@@ -55,7 +55,7 @@ class MessageController extends Controller
         $submit_user_id = $input['submit_user_id'];
         $type = 'messages';
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
 
         $message = Message::where('id', $message_id)->first();
@@ -100,7 +100,7 @@ class MessageController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         if ($input['status'] == 0) {
             $message = Message::where('status', '<>', 4)->orderBy('created_at', 'desc')->get();
@@ -116,7 +116,7 @@ class MessageController extends Controller
         $input = Request()->all();
 
         // dd($input);
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         if (Message::where('id', $input['id'])->exists()) {
             Message::where('id', $input['id'])->delete();
@@ -131,7 +131,7 @@ class MessageController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         Message::where('id', $input['id'])->restore();
 
@@ -148,7 +148,7 @@ class MessageController extends Controller
 
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $result = Message::where('id', $input['id'])->restore();
 
@@ -159,7 +159,7 @@ class MessageController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $message = Message::where('id', $input['id'])->first();
 
@@ -179,7 +179,7 @@ class MessageController extends Controller
 
         $ids = json_decode($input['id']);
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         // return $ids;
 

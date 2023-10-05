@@ -15,7 +15,7 @@ class DeliveryController extends Controller
 
         $idb = $input['idb'];
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $Delivery = Delivery::all();
 
@@ -65,7 +65,7 @@ class DeliveryController extends Controller
         $idb = $input['idb'];
         $Delivery_id = $input['id'];
 
-        Helper::DBConnection('utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
 
         $Delivery = Delivery::where('id', $Delivery_id)->first();
 
@@ -94,7 +94,7 @@ class DeliveryController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Delivery = Delivery::orderBy('priority', 'desc')->get();
 
@@ -105,7 +105,7 @@ class DeliveryController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Delivery = Delivery::where('priority', 1)->first();
 
@@ -117,7 +117,7 @@ class DeliveryController extends Controller
         $input = Request()->all();
 
         // dd($input);
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Delivery = Delivery::all();
 
@@ -145,7 +145,7 @@ class DeliveryController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         Delivery::where('id', $input['id'])->restore();
 
@@ -162,7 +162,7 @@ class DeliveryController extends Controller
 
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $result = Delivery::where('id', $input['id'])->restore();
 
@@ -173,7 +173,7 @@ class DeliveryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $Delivery = Delivery::all();
         $counter = 0;
@@ -201,7 +201,7 @@ class DeliveryController extends Controller
 
         $ids = json_decode($input['id']);
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         // return $ids;
 

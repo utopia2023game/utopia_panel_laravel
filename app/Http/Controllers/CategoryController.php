@@ -16,7 +16,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'name' => 'required',
@@ -43,7 +43,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'name' => 'required',
@@ -62,7 +62,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -77,7 +77,7 @@ class CategoryController extends Controller
 
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -102,7 +102,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -127,7 +127,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -188,7 +188,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         if ($input['children'] == 'true') {
             $categories = Category::whereNull('parent_id')->with('children')->get();
@@ -203,7 +203,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $data_by_cat_id = $input['data_by_cat_id'];
 

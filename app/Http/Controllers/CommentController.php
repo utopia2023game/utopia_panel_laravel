@@ -14,7 +14,7 @@ class CommentController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         Comment::create([
             'product_id' => $input['product_id'],
@@ -31,7 +31,7 @@ class CommentController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $comment = Comment::where('id', $input['id'])->update([
             'status' => $input['status'],
@@ -47,7 +47,7 @@ class CommentController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         if ($input['status'] == 0) {
             $comments = Comment::where('status', '<>', 4)->orderBy('created_at', 'desc')->get();
@@ -64,7 +64,7 @@ class CommentController extends Controller
 
         $ids = json_decode($input['id']);
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $conut = 0;
         for ($i = 0; $i < count($ids); $i++) {
@@ -109,7 +109,7 @@ class CommentController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $ids = json_decode($input['id']);
 
@@ -130,7 +130,7 @@ class CommentController extends Controller
 
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $result = Comment::where('id', $input['id'])->restore();
 
@@ -141,7 +141,7 @@ class CommentController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $comment = Comment::find($input['id']);
 
@@ -157,7 +157,7 @@ class CommentController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection('utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
         $product = Comment::find($input['id']);
 
