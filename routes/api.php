@@ -3,6 +3,7 @@
 use App\Http\Controllers\OrderController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\ControllersManagement\Controller as ManagementController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\StoreController;
@@ -29,6 +30,10 @@ use App\Http\Controllers\DeliveryController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+
+Route::post('create_new_management_db_and_migrate', [ManagementController::class, 'createNewManagementDbAndMigrate'])->name('createNewManagementDbAndMigrate');
 
 Route::post('product_create',[ProductController::class ,'create']);
 Route::post('product_list', [ProductController::class, 'listProducts'])->name('listProducts');
