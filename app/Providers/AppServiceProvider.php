@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Helper::DBConnection(env('SERVER_STATUS_PROVIDER' , '') . '0_utopia_management');
+        // Helper::DBConnection('utopia_store_0001');
     }
 
     

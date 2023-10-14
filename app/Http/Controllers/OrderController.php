@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrderStatus;
 use Exception;
 use Throwable;
 use App\Models\Bank;
@@ -625,7 +626,14 @@ class OrderController extends Controller
 
         Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
-        $Order = Order::where('customer_id', $input['customer_id'])->where('status', $input['status'])->get();
+        $order_status = OrderStatus::where('name', 'LIKE', '%'.$input['status'].'%')->get('id');
+
+        $order_status_id = array();
+        for ($f=0 ; $f < count($order_status); $f++) { 
+            array_push($order_status_id, $order_status[$f]->id);
+        }
+
+        $Order = Order::where('customer_id', $input['customer_id'])->whereIn('order_status_id', $order_status_id)->get();
 
         for ($i = 0; $i < count($Order); $i++) {
             $ids = json_decode($Order[$i]['product_id']);
@@ -658,13 +666,43 @@ class OrderController extends Controller
             // $c['product_name'] = '[' . $d . ']';
             // Order::where('id', $Order[$i]['id'])->update($c);
         }
-
         
 
+        return $Order;
+    }
 
-        
+    public function listOrdersManagement()
+    {
+        $input = Request()->all();
 
-        
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+
+        if  ($input['status'] == 0) {
+            $Order = Order::all();      
+        }else{
+            $Order = Order::where('order_status_id', $input['status'])->get();    
+        }
+
+        for ($i = 0; $i < count($Order); $i++) {
+            $ids = json_decode($Order[$i]['product_id']);
+            $b['product_image'] = array();
+            // $d = '';
+            for ($j = 0; $j < count($ids); $j++) {
+                // echo $ids[$j] . "\n";
+                $a = '';
+                if (Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
+                    $res = Media::where('product_id', $ids[$j])->where('type', 'image')->where('priority', 1)->first();
+                    $a = $res->path;
+                }
+
+                if ($a == '' && Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
+                    $res = Media::where('product_id', $ids[$j])->where('type', 'image')->first();
+                    $a = $res->path;
+                }
+                array_push($b['product_image'], $a);
+            }
+            $Order[$i]['product_image'] = $b['product_image'];
+        }
 
         return $Order;
     }

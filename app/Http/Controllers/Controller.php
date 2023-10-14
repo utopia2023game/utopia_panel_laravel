@@ -63,7 +63,7 @@ class Controller extends BaseController
             $a = array();
             $pass = false;
             for ($i = 0; $i < count($mobiles); $i++) {
-                Helper::DBConnection('0_utopia_management');
+                Helper::DBConnection(env('SERVER_STATUS_PROVIDER' , '') . '0_utopia_management');
 
                 $id = $mobiles[$i]['store_id'];
 
@@ -252,7 +252,7 @@ class Controller extends BaseController
     public function migrateByDataBaseName(Request $request)
     {
         // dd($request);
-        Helper::DBConnection(env() .env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
+        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
         Artisan::call('migrate --database=' . env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 

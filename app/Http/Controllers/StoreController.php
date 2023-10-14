@@ -24,7 +24,7 @@ class StoreController extends Controller
 
         $a = array();
         for ($i = 0; $i < count($data); $i++) {
-            Helper::DBConnection('0_utopia_management');
+            Helper::DBConnection(env('SERVER_STATUS_PROVIDER' , '') . '0_utopia_management');
 
             $dbName = $data[$i]['id'];
 

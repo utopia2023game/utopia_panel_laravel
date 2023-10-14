@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_statuses', function (Blueprint $table) {
+        Schema::create('sms_customer_logons', function (Blueprint $table) {
             $table->id();
-            $table->text('name');
-            $table->text('name_persian');
+            $table->string('mobile',11);
+            $table->string('code');
+            $table->integer('entry_times')->default(1);
             $table->timestampsTz();
             $table->softDeletesTz();
         });
@@ -25,6 +26,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_statuses');
+        Schema::table('sms_customer_logons', function (Blueprint $table) {
+            Schema::dropIfExists('sms_customer_logons');
+        });
     }
 };

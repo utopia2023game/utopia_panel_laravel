@@ -15,18 +15,29 @@ class Controller extends BaseController
     use AuthorizesRequests, ValidatesRequests;
     public function createNewManagementDbAndMigrate(Request $request)
     {
-        Helper::DBConnection('mysql');
+        try {
+            DB::statement('CREATE DATABASE IF NOT EXISTS ' . env('SERVER_STATUS', '') . $request->dbName);
+
+            Helper::DBConnection(env('SERVER_STATUS', '') . $request->dbName);
+
+            Artisan::call('migrate  --path=/database/migrations/management --database=' . env('SERVER_STATUS', '') . $request->dbName);
+
+            Helper::DBConnection('mysql');
+        } catch (\Exception $e) {
+            // return $e->getCode();
+            return 0;
+        }
 
         // dd($request->dbName);
 
-        DB::statement('CREATE DATABASE IF NOT EXISTS ' . env('SERVER_STATUS' , '') . $request->dbName);
-
-        Helper::DBConnection(env('SERVER_STATUS' , '') . $request->dbName);
-
-        Artisan::call('migrate  --path=/database/migrations/management --database=' . env('SERVER_STATUS' , '') . $request->dbName);
-
-        return  1;
+        return 1;
     }
+
+    public function inputCheck(Request $request)
+    {
+        dd($request);
+    }
+
 
     // public function migrateByDataBaseName(Request $request)
     // {
@@ -34,10 +45,10 @@ class Controller extends BaseController
     //     Helper::DBConnection($request->dbName);
 
     //     Artisan::call('migrate --database=' . env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
-        
+
     // }
 
-//     public function migrateAllDataBase(Request $request)
+    //     public function migrateAllDataBase(Request $request)
 //     {
 //         $databases = DB::select('SHOW DATABASES');
 //         foreach ($databases as $database) {
@@ -49,13 +60,13 @@ class Controller extends BaseController
 //     }
 
 
-//     public function rollBackByDataBaseName(Request $request){
+    //     public function rollBackByDataBaseName(Request $request){
 //         Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
-//         Artisan::call('migrate:rollback --database=' . env('SERVER_STATUS' , '') . 'utopia_store_'.$request->dbName);
+    //         Artisan::call('migrate:rollback --database=' . env('SERVER_STATUS' , '') . 'utopia_store_'.$request->dbName);
 //     }
 
-//     public function rollBackAllDataBase(Request $request){
+    //     public function rollBackAllDataBase(Request $request){
 //         $databases = DB::select('SHOW DATABASES');
 //         foreach ($databases as $database) {
 //             if(str_contains($database->Database , $request->contains)){
@@ -66,13 +77,13 @@ class Controller extends BaseController
 //     }
 
 
-//     public function migrateFreshByDataBaseName(Request $request){
+    //     public function migrateFreshByDataBaseName(Request $request){
 //         Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $request->dbName);
 
-//         Artisan::call('migrate:fresh --database=' . env('SERVER_STATUS' , '') . 'utopia_store_'.$request->dbName);
+    //         Artisan::call('migrate:fresh --database=' . env('SERVER_STATUS' , '') . 'utopia_store_'.$request->dbName);
 //     }
 
-//     public function migrateFreshAllDataBase(Request $request){
+    //     public function migrateFreshAllDataBase(Request $request){
 //         $databases = DB::select('SHOW DATABASES');
 //         foreach ($databases as $database) {
 //             if(str_contains($database->Database , $request->contains)){
@@ -82,6 +93,6 @@ class Controller extends BaseController
 //         }
 //     }
 
-    
-    
+
+
 }

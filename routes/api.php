@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderStatusController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\ControllersManagement\Controller as ManagementController;
+use App\Http\ControllersManagement\CategoryController as ManagementCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\StoreController;
@@ -33,7 +35,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
+Route::post('get_list_category', [ManagementCategoryController::class, 'getListCategory'])->name('getListCategory');
 Route::post('create_new_management_db_and_migrate', [ManagementController::class, 'createNewManagementDbAndMigrate'])->name('createNewManagementDbAndMigrate');
+Route::post('input_check', [ManagementController::class, 'inputCheck'])->name('inputCheck');
 
 Route::post('product_create',[ProductController::class ,'create']);
 Route::post('product_list', [ProductController::class, 'listProducts'])->name('listProducts');
@@ -67,8 +71,11 @@ Route::post('login_overview_with_password', [Controller::class, 'loginMobileOver
 
 Route::post('store_list', [StoreController::class, 'storeList'])->name('storeList');
 
+Route::post('list_order_status', [OrderStatusController::class, 'listOrdersStatus'])->name('listOrdersStatus');
+
 Route::post('send_order_cart', [OrderController::class, 'sendOrderCart'])->name('sendOrderCart');
 Route::post('list_order', [OrderController::class, 'listOrders'])->name('listOrders');
+Route::post('list_order_management', [OrderController::class, 'listOrdersManagement'])->name('listOrdersManagement');
 Route::post('change_status', [OrderController::class, 'changeStatus'])->name('changeStatus');
 
 Route::post('message_create', [MessageController::class, 'MessageCreate'])->name('MessageCreate');

@@ -61,17 +61,17 @@ class Helper
 
     public static function DBConnection($dbName)
     {
-        if (env('APP_ENV') == 'local') {
-            // $dbName = "test_me";
-            $host = '127.0.0.1';
-            $user = "root";
-            $password = "";
-        } else {
-            // $dbName = 'tic_tac';
-            $host = 'localhost';
-            $user = "";
-            $password = "";
-        }
+        // if (env('APP_ENV') == 'local') {
+        //     // $dbName = "test_me";
+        //     $host = '127.0.0.1';
+        //     $user = "root";
+        //     $password = "";
+        // } else {
+        //     // $dbName = 'tic_tac';
+        //     $host = 'localhost';
+        //     $user = "";
+        //     $password = "";
+        // }
         $state = true;
         try {
             Config::set(
@@ -79,11 +79,15 @@ class Helper
                 array(
                     'driver' => 'mysql',
                     'url' => env('DATABASE_URL'),
-                    'host' => $host,
+                    // 'host' => $host,
+                    'host' => env('DB_HOST', '127.0.0.1'),
                     'port' => env('DB_PORT', '3306'),
-                    'database' => $dbName,
-                    'username' => $user,
-                    'password' => $password,
+                    'database' => env('SERVER_STATUS_PROVIDER', '') . '0_utopia_management',
+                    'username' => env('DB_USERNAME', 'root'),
+                    'password' => env('DB_PASSWORD', ''),
+                    // 'database' => $dbName,
+                    // 'username' => $user,
+                    // 'password' => $password,
                     'unix_socket' => env('DB_SOCKET', ''),
                     'charset' => 'utf8',
                     'collation' => 'utf8_unicode_ci',
@@ -302,8 +306,8 @@ class Helper
     {
         if (
             $product->discount_percent == 0 && $product->discount_manual == 0 || $product->discount_percent > 0 && $product->discount_manual > 0
-            || $product->discount_percent > 100 || $product->discount_manual > $product->sale_price || $product->discount_percent < 0 
-            || $product->discount_manual < 0  || $product->confirm_discount == 0
+            || $product->discount_percent > 100 || $product->discount_manual > $product->sale_price || $product->discount_percent < 0
+            || $product->discount_manual < 0 || $product->confirm_discount == 0
         ) {
             $a = array();
             $a['confirm_discount'] = 0;
@@ -342,26 +346,26 @@ class Helper
 
 
     public static function generateUniqueCode()
-{
+    {
 
-    $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    // $characters = '0123456789';
-    $charactersNumber = strlen($characters);
-    // $codeLength = 12;
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        // $characters = '0123456789';
+        $charactersNumber = strlen($characters);
+        // $codeLength = 12;
 
-    $code = '';
+        $code = '';
 
-    while (strlen($code) < 12) {
-        $position = rand(0, $charactersNumber - 1);
-        $character = $characters[$position];
-        $code = $code.$character;
+        while (strlen($code) < 12) {
+            $position = rand(0, $charactersNumber - 1);
+            $character = $characters[$position];
+            $code = $code . $character;
+        }
+
+        if (Order::where('order_code', $code)->exists()) {
+            Helper::generateUniqueCode();
+        }
+
+        return $code;
+
     }
-
-    if (Order::where('order_code', $code)->exists()) {
-        Helper::generateUniqueCode();
-    }
-
-    return $code;
-
-}
 }

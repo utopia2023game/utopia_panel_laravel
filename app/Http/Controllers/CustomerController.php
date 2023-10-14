@@ -14,7 +14,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CustomerController extends BaseController
 {
-    use AuthorizesRequests, ValidatesRequests , SoftDeletes;
+    use AuthorizesRequests, ValidatesRequests, SoftDeletes;
 
     // public function loginMobilePassword(Request $request)
     // {
@@ -58,7 +58,7 @@ class CustomerController extends BaseController
     //         $a = array();
     //         $pass = false;
     //         for ($i = 0; $i < count($mobiles); $i++) {
-    //             Helper::DBConnection('0_utopia_management');
+    //             Helper::DBConnection(env('SERVER_STATUS_PROVIDER' , '') . '0_utopia_management');
 
     //             $id = $mobiles[$i]['store_id'];
 
@@ -106,26 +106,33 @@ class CustomerController extends BaseController
         $res = [];
         $res['data'] = [];
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
-        $customer = Customer::where('mobile', $input['mobile'])->first();
 
-        
-        if ($customer->status == 1) {
-            if ($customer!='' && Hash::check($input['password'], $customer->password)) {
-                $customer->update(['remember_token' => $input['remember_token']]);
-                $res['result'] = true;
-                $res['message'] = 'success';
-                $res['data'] = $customer;
-            }else{
+        if (Customer::where('mobile', $input['mobile'])->exists()) {
+            $customer = Customer::where('mobile', $input['mobile'])->first();
+
+
+            if ($customer->status == 1) {
+                if ($customer != '' && Hash::check($input['password'], $customer->password)) {
+                    $customer->update(['remember_token' => $input['remember_token']]);
+                    $res['result'] = true;
+                    $res['message'] = 'success';
+                    $res['data'] = $customer;
+                } else {
+                    $res['result'] = false;
+                    $res['message'] = 'password';
+                }
+            } else {
                 $res['result'] = false;
-                $res['message'] = 'password';
+                $res['message'] = 'status';
+                $res['status'] = $customer->status;
             }
         } else {
             $res['result'] = false;
-            $res['message'] = 'status';
-            $res['status'] = $customer->status;
+            $res['message'] = 'mobileNotExists';
         }
+
         // dd( $res);
 
         return $res;
@@ -144,8 +151,8 @@ class CustomerController extends BaseController
     {
         $input = $request->all();
         // return $input;
-        
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $SmsCustomerLogon = SmsCustomerLogon::where('mobile', $input['mobile'])->first();
 
@@ -184,7 +191,7 @@ class CustomerController extends BaseController
     {
         $input = $request->all();
         // return $input;
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $customer = Customer::where('mobile', $input['mobile'])->get();
 
@@ -196,4 +203,3 @@ class CustomerController extends BaseController
         }
     }
 }
-
