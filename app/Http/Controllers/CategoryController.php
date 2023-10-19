@@ -16,7 +16,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'name' => 'required',
@@ -43,7 +43,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'name' => 'required',
@@ -62,7 +62,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -77,7 +77,7 @@ class CategoryController extends Controller
 
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -102,7 +102,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -127,7 +127,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
             'id' => 'nullable|numeric'
@@ -139,8 +139,6 @@ class CategoryController extends Controller
             $category_data = Category::where('id', $input['id']);
             if ($input['status'] == 'add') {
                 if ($request->hasFile('image_file')) {
-
-
                     $file_name = rand(1000, 9999) . '_' . $input['image_file']->getClientOriginalName();
                     // $destinationPath = 'uploads/' . $type . '/' . $file_name;
                     $destinationPath = 'uploads/' . $input['idb'] . '/categories_image/';
@@ -188,7 +186,7 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         if ($input['children'] == 'true') {
             $categories = Category::whereNull('parent_id')->with('children')->get();
@@ -203,24 +201,75 @@ class CategoryController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        // return $input ;
+
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
+
+        $search_text = $input['search_text'];
+        $filter = $input['filter'];
+
+        $products = array();
 
         $data_by_cat_id = $input['data_by_cat_id'];
 
-        $items[0][0] = explode('/', $this->getParentNameCategoriesById($data_by_cat_id));
+        if ($data_by_cat_id == 0) {
+            $items[0][0] = array();
+            array_push($items[0][0] , 'همه دسته ها');
 
-        $data_by_cat_id = $this->getParentIdCategoriesById($data_by_cat_id);
+            $items[0][1] = array();
+            array_push($items[0][1] , 0);
 
-        $items[0][1] = json_decode($data_by_cat_id);
+            $items[1] = Category::whereNull('parent_id')->get();
+        } else {
+            $items[0][0] = explode('/', $this->getParentNameCategoriesById($data_by_cat_id));
 
-        $items[1] = Category::where('parent_id', $input['data_by_cat_id'])->get();
+            $data_by_cat_id = $this->getParentIdCategoriesById($data_by_cat_id);
 
-        $products = Product::orderBy('created_at', 'desc')->get();
+            $items[0][1] = json_decode($data_by_cat_id);
 
+            $items[1] = Category::where('parent_id', $input['data_by_cat_id'])->get();
+        }
+
+
+
+        if (!empty($search_text) && !empty($filter)) {
+            if ($filter == 'popular') {
+                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderBy('page_view', 'desc')->get();
+            } else if ($filter == 'newest') {
+                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderBy('created_at', 'desc')->get();
+            } else if ($filter == 'expensive') {
+                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderByRaw('(sale_price - discount_price) DESC')->get();
+            } else if ($filter == 'inexpensive') {
+                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderByRaw('(sale_price - discount_price) ASC')->get();
+            } else if ($filter == 'best_selling') {
+                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->get(); // add order count to table and when set
+            } else {
+                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->get();
+            }
+        } else if (empty($search_text) && !empty($filter)) {
+            if ($filter == 'popular') {
+                $products = Product::orderBy('page_view', 'desc')->get();
+            } else if ($filter == 'newest') {
+                $products = Product::orderBy('created_at', 'desc')->get();
+            } else if ($filter == 'expensive') {
+                $products = Product::orderByRaw('(sale_price - discount_price) DESC')->get();
+            } else if ($filter == 'inexpensive') {
+                $products = Product::orderByRaw('(sale_price - discount_price) ASC')->get();
+            } else if ($filter == 'best_selling') {
+                $products = Product::all(); // add order count to table and when set
+            } else {
+                $products = Product::all();
+            }
+        } else if (!empty($search_text) && empty($filter)) {
+            $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->get();
+        } else if (empty($search_text) && empty($filter)) {
+            $products = Product::orderBy('created_at', 'desc')->get();
+        }
+        
         $items[2] = array();
         for ($i = 0; $i < count($products); $i++) {
             Helper::updatingProductsPrice($products[$i]);
-
+            // echo $products[$j];
             $categories_id = json_decode($products[$i]->categories_id);
             for ($j = 0; $j < count($categories_id); $j++) {
                 $cat_id[$j] = $this->getParentIdCategoriesById($categories_id[$j]);
@@ -228,7 +277,7 @@ class CategoryController extends Controller
                     $cat_name = array();
                 }
 
-                if ($this->compareTwoVariable($data_by_cat_id, $cat_id[$j]) == 1) {
+                if ($data_by_cat_id == 0 || $this->compareTwoVariable($data_by_cat_id, $cat_id[$j]) == 1) {
                     $cat_name[count($cat_name)] = $this->getCatNameCategoriesById($categories_id[$j]);
                 }
 
@@ -244,7 +293,6 @@ class CategoryController extends Controller
                 }
             }
         }
-
         return $items;
     }
 

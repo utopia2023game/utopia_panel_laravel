@@ -474,7 +474,7 @@ class ProductController extends Controller
 
     }
 
-    public function setVisitProduct(Request $request)
+    public function setpage_viewProduct(Request $request)
     {
         $input = $request->all();
 
@@ -483,7 +483,7 @@ class ProductController extends Controller
         $product = Product::find($input['id']);
 
         $product = $product->update([
-            'visit' => ($product->visit) + 1
+            'page_view' => ($product->page_view) + 1
         ]);
 
         return $product;

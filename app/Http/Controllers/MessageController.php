@@ -155,7 +155,7 @@ class MessageController extends Controller
         return $result;
     }
 
-    public function setVisitMessage(Request $request)
+    public function setpage_viewMessage(Request $request)
     {
         $input = $request->all();
 
@@ -165,7 +165,7 @@ class MessageController extends Controller
 
         if (Message::where('id', $input['id'])->exists()) {
             $message = $message->update([
-                'visit' => ($message->visit) + 1
+                'page_view' => ($message->page_view) + 1
             ]);
         } else {
             return 0;

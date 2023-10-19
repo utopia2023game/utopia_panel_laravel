@@ -269,6 +269,18 @@ class Controller extends BaseController
         }
     }
 
+    public function migrateStatusAllDataBase(Request $request)
+    {
+        // dd($request);
+        $databases = DB::select('SHOW DATABASES');
+        foreach ($databases as $database) {
+            if (str_contains($database->Database, $request->contains)) {
+                Helper::DBConnection($database->Database);
+                Artisan::call('migrate:status --database=' . $database->Database);
+            }
+        }
+    }
+
 
     public function rollBackByDataBaseName(Request $request)
     {

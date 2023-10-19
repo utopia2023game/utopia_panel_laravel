@@ -47,7 +47,7 @@ Route::post('product_softdelete', [ProductController::class, 'softdelete'])->nam
 Route::post('product_forcedelete', [ProductController::class, 'forcedelete'])->name('forcedelete');
 Route::post('product_restore', [ProductController::class, 'restore'])->name('restore');
 Route::post('product_data', [ProductController::class, 'ProductData'])->name('ProductData');
-Route::post('set_visit_product', [ProductController::class, 'setVisitProduct'])->name('setVisitProduct');
+Route::post('set_page_view_product', [ProductController::class, 'setPageViewProduct'])->name('setPageViewProduct');
 
 
 Route::post('category_create', [CategoryController::class, 'create'])->name('create');
@@ -84,7 +84,7 @@ Route::post('list_messages', [MessageController::class, 'listMessages'])->name('
 Route::post('message_soft_delete', [MessageController::class, 'softdelete'])->name('softdelete');
 Route::post('message_force_delete', [MessageController::class, 'forcedelete'])->name('forcedelete');
 Route::post('message_restore', [MessageController::class, 'restore'])->name('restore');
-Route::post('set_visit_message', [MessageController::class, 'setVisitMessage'])->name('setVisitMessage');
+Route::post('set_page_view_message', [MessageController::class, 'setPageViewMessage'])->name('setPageViewMessage');
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
 
 Route::post('address_create', [AddressController::class, 'AddressCreate'])->name('AddressCreate');

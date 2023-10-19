@@ -44,7 +44,7 @@ class ProductFactory extends Factory
             'safe_discount_percent' => rand(5,10),
             'special_discount_percent' => rand(10,15),
             'exceptional_discount_percent' => rand(15,20),
-            'visit' => rand(15,2000),
+            'page_view' => rand(15,2000),
         ];
     }
 }

@@ -21,6 +21,7 @@ Route::get('/migrate_fresh_by_database_name', [Controller::class, 'migrateFreshB
 
 Route::get('/rollback_all_database', [Controller::class, 'rollBackAllDataBase'])->name('rollBackAllDataBase');
 Route::get('/migrate_all_database', [Controller::class, 'migrateAllDataBase'])->name('migrateAllDataBase');
+Route::get('/migrate_status_all_database', [Controller::class, 'migrateStatusAllDataBase'])->name('migrateStatusAllDataBase');
 Route::get('/migrate_fresh_all_database', [Controller::class, 'migrateFreshAllDataBase'])->name('migrateFreshAllDataBase');
 
 Route::get('/category_store', [Controller::class, 'categoryStore'])->name('categoryStore');

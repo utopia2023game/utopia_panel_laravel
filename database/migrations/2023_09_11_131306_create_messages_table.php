@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('subject')->nullable();
             $table->text('text')->nullable();
             $table->text('image_path')->nullable();
-            $table->integer('visit')->default(0);
+            $table->integer('page_view')->default(0);
             $table->timestampsTz();
             $table->softDeletesTz();
         });
