@@ -1,13 +1,12 @@
 <?php
 
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OrderStatusController;
+use App\Http\Controllers\AlarmController;
+use App\Http\Controllers\AnalyticsCustomerController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\ControllersManagement\Controller as ManagementController;
-use App\Http\ControllersManagement\CategoryController as ManagementCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\AddressController;
@@ -17,6 +16,10 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\OrderStatusController;
+use App\Http\Controllers\HistoryCustomerController;
+use App\Http\ControllersManagement\Controller as ManagementController;
+use App\Http\ControllersManagement\CategoryController as ManagementCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +62,14 @@ Route::post('category_list', [CategoryController::class, 'listCategory'])->name(
 Route::post('category_children_list_by_cat_id', [CategoryController::class, 'categoryChildrenListByCatId'])->name('categoryChildrenListByCatId');
 Route::post('category_add_remove_image', [CategoryController::class, 'categoryAddRemoveImage'])->name('categoryAddRemoveImage');
 
+Route::post('set_hc_category', [HistoryCustomerController::class, 'setHcCategory'])->name('setHcCategory');
+Route::post('set_hc_cart', [HistoryCustomerController::class, 'setHcCart'])->name('setHcCart');
+Route::post('set_hc_next_cart', [HistoryCustomerController::class, 'setHcNextCart'])->name('setHcNextCart');
+Route::post('set_hc_view', [HistoryCustomerController::class, 'setHcView'])->name('setHcView');
+Route::post('set_hc_like', [HistoryCustomerController::class, 'setHcLike'])->name('setHcLike');
+Route::post('set_hc_share', [HistoryCustomerController::class, 'setHcShare'])->name('setHcShare');
+Route::post('set_hc_user', [HistoryCustomerController::class, 'setHcUser'])->name('setHcUser');
+
 
 Route::post('create_new_customer', [CustomerController::class, 'createNewCustomer'])->name('createNewCustomer');
 Route::post('check_customer_and_send_mobile_verify_code', [CustomerController::class, 'checkCustomerAndSendMobileVerifyCode'])->name('checkCustomerAndSendMobileVerifyCode');
@@ -97,6 +108,10 @@ Route::post('address_restore', [AddressController::class, 'restore'])->name('res
 Route::post('set_priority_address', [AddressController::class, 'setPriorityAddress'])->name('setPriorityAddress');
 Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->name('confirmAddress');
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
+
+Route::post('list_alarm_with_status', [AlarmController::class, 'listAlarmWithStatus'])->name('listAlarmWithStatus');
+
+Route::post('customer_perfermance_computing_oprations', [AnalyticsCustomerController::class, 'customerPerfermanceComputingOprations'])->name('customerPerfermanceComputingOprations');
 
 Route::post('delivery_create', [DeliveryController::class, 'DeliveryCreate'])->name('DeliveryCreate');
 Route::post('delivery_update', [DeliveryController::class, 'updateDelivery'])->name('updateDelivery');

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\OrderStatus;
 use Exception;
 use Throwable;
+use Carbon\Carbon;
 use App\Models\Bank;
 use App\Models\Media;
 use App\Models\Order;
@@ -13,8 +13,12 @@ use App\Models\Address;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Delivery;
+use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 use Hekmatinasser\Verta\Verta;
+use App\Models\HistoryCustomerOrder;
+use App\Models\HistoryCustomerDevice;
+use App\Http\Controllers\HistoryCustomerController;
 
 class OrderController extends Controller
 {
@@ -33,7 +37,7 @@ class OrderController extends Controller
         // return $input;
         $idb = $input['idb'];
         $bid = $input['bid'];
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $idb);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $idb);
 
         try {
             $checkingCustomerExists = $this->checkingCustomerExists($input['customer_id']);
@@ -69,7 +73,7 @@ class OrderController extends Controller
                                             $a = '';
                                             for ($i = 0; $i < count($product_id); $i++) {
 
-                                                $a .=  '"' . Product::where('id', $product_id[$i])->value('title')  . '"';
+                                                $a .= '"' . Product::where('id', $product_id[$i])->value('title') . '"';
 
                                                 $i + 1 != count($product_id) ? $a .= ',' : null;
                                             }
@@ -84,16 +88,29 @@ class OrderController extends Controller
                                             $input['address_receiver_post_code'] = $address->receiver_post_code;
 
                                             // return $input;
-                                            Order::create($input);
+                                            $order = Order::create($input);
                                         }
 
                                         $bank = Bank::where('id', $bid)->first();
                                         $result['result'] = true;
                                         $result['callback_value'] = $bank->url;
                                         $result['message'] = 'checkingDataIsTrue';
+
+                                        $hcDevice_id = HistoryCustomerController::setAndGetDeviceInfoId($input['device_info'], $input['customer_id']);
+
+                                        $hcOrder = array();
+                                        $hcOrder['device_history_id'] = $hcDevice_id;
+                                        $hcOrder['customer_id'] = $input['customer_id'];
+                                        $hcOrder['order_id'] = $order->id;
+                                        $hcOrder['order_status_id'] = 1; // default 1 means pay_paying
+                                        $hcOrder['execute_time'] = Carbon::now()->toDateTimeString();
+
+                                        // return $hcOrder;
+                                        HistoryCustomerOrder::create($hcOrder);
+
                                     } catch (\Throwable $th) {
                                         $result['result'] = false;
-                                        $result['message'] = 'createTableFalse';
+                                        $result['message'] = 'createTableFalse' . $th;
                                     }
 
                                 } else {
@@ -464,8 +481,9 @@ class OrderController extends Controller
         if ($updateProductDiscountTimeSystematic['result']) {
             $discount_percent = $product->discount_percent == null || $product->discount_percent == '' ? 0 : $product->discount_percent;
             $discount_manual = $product->discount_manual == null || $product->discount_manual == '' ? 0 : $product->discount_manual;
+            $discount_price = $product->discount_price == null || $product->discount_price == '' ? 0 : $product->discount_price;
 
-            $this->updateProductConfirmDiscount($product, $discount_percent, $discount_manual);
+            $this->updateProductConfirmDiscount($product, $discount_percent, $discount_manual, $discount_price);
 
             $confirm_discount = $product->confirm_discount == null || $product->confirm_discount == '' ? 0 : $product->confirm_discount;
 
@@ -605,9 +623,9 @@ class OrderController extends Controller
 
         return $result;
     }
-    public function updateProductConfirmDiscount($product, $discount_percent, $discount_manual)
+    public function updateProductConfirmDiscount($product, $discount_percent, $discount_manual, $discount_price)
     {
-        if ($discount_percent == 0 && $discount_manual == 0 || $discount_percent > 0 && $discount_manual > 0) {
+        if ($discount_percent == 0 && $discount_manual == 0 || $discount_percent > 0 && $discount_manual > 0 || $discount_price == 0 && $discount_percent > 0 || $discount_price == 0 && $discount_manual > 0) {
             $a = array();
             $a['confirm_discount'] = 0;
             $a['discount_percent'] = 0;
@@ -624,12 +642,12 @@ class OrderController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
-        $order_status = OrderStatus::where('name', 'LIKE', '%'.$input['status'].'%')->get('id');
+        $order_status = OrderStatus::where('name', 'LIKE', '%' . $input['status'] . '%')->get('id');
 
         $order_status_id = array();
-        for ($f=0 ; $f < count($order_status); $f++) { 
+        for ($f = 0; $f < count($order_status); $f++) {
             array_push($order_status_id, $order_status[$f]->id);
         }
 
@@ -653,20 +671,20 @@ class OrderController extends Controller
                 }
                 array_push($b['product_image'], $a);
 
-                
+
                 // $d .= '"' . Product::where('id', $ids[$j])->value('title') . '"';
-    
+
                 // $j + 1 == count($ids) ? null : $d .= ',';
             }
             $Order[$i]['product_image'] = $b['product_image'];
 
 
-            
-            
+
+
             // $c['product_name'] = '[' . $d . ']';
             // Order::where('id', $Order[$i]['id'])->update($c);
         }
-        
+
 
         return $Order;
     }
@@ -675,12 +693,12 @@ class OrderController extends Controller
     {
         $input = Request()->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
-        if  ($input['status'] == 0) {
-            $Order = Order::all();      
-        }else{
-            $Order = Order::where('order_status_id', $input['status'])->get();    
+        if ($input['status'] == 0) {
+            $Order = Order::all();
+        } else {
+            $Order = Order::where('order_status_id', $input['status'])->get();
         }
 
         for ($i = 0; $i < count($Order); $i++) {
@@ -713,7 +731,7 @@ class OrderController extends Controller
 
         $id = $input['id'];
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $Order = Order::where('id', $id)->first();
 

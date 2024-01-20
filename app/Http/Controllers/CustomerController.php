@@ -151,24 +151,28 @@ class CustomerController extends BaseController
     {
         $input = $request->all();
         // return $input;
+        $res['result'] = 0;
+        $res['customer_id'] = 0;
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $SmsCustomerLogon = SmsCustomerLogon::where('mobile', $input['mobile'])->first();
 
         if ($SmsCustomerLogon == '') {
-            return -1;
+            $res['result'] = -1;
+            return $res;
         }
 
         $updatedAt = $SmsCustomerLogon->updated_at;
 
         if (now()->diffInMinutes($updatedAt) >= 2) {
-            return -2;
+            $res['result'] = -2;
+            return $res;
         }
 
         if (Hash::check($input['mobile_verify_code'], $SmsCustomerLogon->code)) {
             try {
-                Customer::create([
+                $customer = Customer::create([
                     'status' => '1',
                     'name' => $input['name'],
                     'family' => $input['family'],
@@ -178,11 +182,16 @@ class CustomerController extends BaseController
                     'password' => $input['password'],
                 ]);
             } catch (\Exception $e) {
-                return $e->getCode();
+                $res['result'] = -3;
+                return $res;
+                // return $e->getCode();
             }
-            return 1;
+            $res['result'] = 1;
+            $res['customer_id'] = $customer->id;
+            return $res;
         } else {
-            return 0;
+            $res['result'] = 0;
+            return $res;
         }
 
     }

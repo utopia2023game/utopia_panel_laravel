@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration {
     /**
@@ -10,6 +11,55 @@ return new class extends Migration {
      */
     public function up(): void
     {
+
+
+
+        
+        // if (Schema::hasTable('alarms')) {
+        //     Schema::table('alarms', function (Blueprint $table) {
+        //         $table->integer('delay_day_execute')->default(10)->after('priority');
+        //     });
+        // }
+        
+        // if (Schema::hasTable('history_customer_carts')) {
+        //     // Schema::table('history_customer_carts', function (Blueprint $table) {
+        //     //     $table->renameColumn('count', 'count_old');
+        //     // });
+        //     Schema::table('history_customer_carts', function (Blueprint $table) {
+        //         $table->integer('increment_decrement')->default(0)->after('before_count');
+        //     });
+
+        //     DB::table('history_customer_carts')->update([
+        //         'increment_decrement' => DB::raw('count')   
+        //     ]);
+        
+        //     //Remove the old column:
+        //     Schema::table('history_customer_carts', function(Blueprint $table)
+        //     {
+        //         $table->dropColumn('count');
+        //     });
+        // }
+
+        // Schema::disableForeignKeyConstraints();
+        // if (Schema::hasTable('history_customer_categories')) {
+        //     Schema::table('history_customer_categories', function (Blueprint $table) {
+        //         $table->integer('category_id')->nullable()->change();
+        //     });
+        //     Schema::table('history_customer_categories', function (Blueprint $table) {
+        //         $table->renameColumn('result_count', 'sub_category_count');
+        //     });
+        //     Schema::table('history_customer_categories', function (Blueprint $table) {
+        //         $table->integer('product_count')->default(0)->after('sub_category_count');
+        //         $table->text('category_name')->nullable()->after('category_id');
+        //         $table->text('search')->nullable()->after('category_name');
+        //         $table->text('filter')->nullable()->after('search');
+        //         $table->text('hashtag')->nullable()->after('filter');
+        //         $table->text('sort')->nullable()->after('hashtag');
+        //     });
+        // }
+        // Schema::enableForeignKeyConstraints();
+
+
 
         // if (Schema::hasTable('messages')) {
         //     Schema::table('messages', function (Blueprint $table) {
@@ -29,7 +79,7 @@ return new class extends Migration {
         //     $table->double('width')->change();
         //     $table->double('height')->change();
         //     $table->double('length')->change();
-        //     $table->integer('page_view_uniqe')->default(0)->after('page_view');
+        //     $table->integer('page_view_unique')->default(0)->after('page_view');
         //     $table->integer('page_view_avg_time')->default(0)->after('page_view_uniqe');
         //     $table->integer('pay')->default(0)->after('page_view_avg_time');
         //     $table->integer('process')->default(0)->after('pay');
@@ -46,8 +96,23 @@ return new class extends Migration {
     public function down(): void
     {
 
+        // Schema::disableForeignKeyConstraints();
+        // Schema::dropIfExists('history_customer_devices');
+        // Schema::enableForeignKeyConstraints();
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
 // try {
 //             Schema::table('history_customer_carts', function (Blueprint $table) {
 //                 $table->dropForeign('history_customer_carts_product_id_foreign');

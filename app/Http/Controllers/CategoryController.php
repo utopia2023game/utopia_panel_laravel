@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Media;
 use App\Helpers\Helper;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Exception;
+use App\Models\HistoryCustomerDevice;
+use Illuminate\Support\Facades\Schema;
+use App\Models\HistoryCustomerCategory;
 
 class CategoryController extends Controller
 {
@@ -197,16 +200,19 @@ class CategoryController extends Controller
         return $categories;
     }
 
+    
     public function categoryChildrenListByCatId(Request $request)
     {
         $input = $request->all();
 
-        // return $input ;
+        // return $input;
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
-        $search_text = $input['search_text'];
+        $search = $input['search'];
         $filter = $input['filter'];
+        $hashtag = $input['hashtag'];
+        $sort = $input['sort'];
 
         $products = array();
 
@@ -214,10 +220,10 @@ class CategoryController extends Controller
 
         if ($data_by_cat_id == 0) {
             $items[0][0] = array();
-            array_push($items[0][0] , 'همه دسته ها');
+            array_push($items[0][0], 'همه دسته ها');
 
             $items[0][1] = array();
-            array_push($items[0][1] , 0);
+            array_push($items[0][1], 0);
 
             $items[1] = Category::whereNull('parent_id')->get();
         } else {
@@ -232,40 +238,40 @@ class CategoryController extends Controller
 
 
 
-        if (!empty($search_text) && !empty($filter)) {
-            if ($filter == 'popular') {
-                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderBy('page_view', 'desc')->get();
-            } else if ($filter == 'newest') {
-                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderBy('created_at', 'desc')->get();
-            } else if ($filter == 'expensive') {
-                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderByRaw('(sale_price - discount_price) DESC')->get();
-            } else if ($filter == 'inexpensive') {
-                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->orderByRaw('(sale_price - discount_price) ASC')->get();
-            } else if ($filter == 'best_selling') {
-                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->get(); // add order count to table and when set
+        if (!empty($search) && !empty($sort)) {
+            if ($sort == 'popular') {
+                $products = Product::where('title', 'LIKE', '%' . $search . '%')->orderBy('page_view', 'desc')->get();
+            } else if ($sort == 'newest') {
+                $products = Product::where('title', 'LIKE', '%' . $search . '%')->orderBy('created_at', 'desc')->get();
+            } else if ($sort == 'expensive') {
+                $products = Product::where('title', 'LIKE', '%' . $search . '%')->orderByRaw('(sale_price - discount_price) DESC')->get();
+            } else if ($sort == 'inexpensive') {
+                $products = Product::where('title', 'LIKE', '%' . $search . '%')->orderByRaw('(sale_price - discount_price) ASC')->get();
+            } else if ($sort == 'best_selling') {
+                $products = Product::where('title', 'LIKE', '%' . $search . '%')->get(); // add order count to table and when set
             } else {
-                $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->get();
+                $products = Product::where('title', 'LIKE', '%' . $search . '%')->get();
             }
-        } else if (empty($search_text) && !empty($filter)) {
-            if ($filter == 'popular') {
+        } else if (empty($search) && !empty($sort)) {
+            if ($sort == 'popular') {
                 $products = Product::orderBy('page_view', 'desc')->get();
-            } else if ($filter == 'newest') {
+            } else if ($sort == 'newest') {
                 $products = Product::orderBy('created_at', 'desc')->get();
-            } else if ($filter == 'expensive') {
+            } else if ($sort == 'expensive') {
                 $products = Product::orderByRaw('(sale_price - discount_price) DESC')->get();
-            } else if ($filter == 'inexpensive') {
+            } else if ($sort == 'inexpensive') {
                 $products = Product::orderByRaw('(sale_price - discount_price) ASC')->get();
-            } else if ($filter == 'best_selling') {
+            } else if ($sort == 'best_selling') {
                 $products = Product::all(); // add order count to table and when set
             } else {
                 $products = Product::all();
             }
-        } else if (!empty($search_text) && empty($filter)) {
-            $products = Product::where('title', 'LIKE', '%' . $search_text . '%')->get();
-        } else if (empty($search_text) && empty($filter)) {
+        } else if (!empty($search) && empty($sort)) {
+            $products = Product::where('title', 'LIKE', '%' . $search . '%')->get();
+        } else if (empty($search) && empty($sort)) {
             $products = Product::orderBy('created_at', 'desc')->get();
         }
-        
+
         $items[2] = array();
         for ($i = 0; $i < count($products); $i++) {
             Helper::updatingProductsPrice($products[$i]);

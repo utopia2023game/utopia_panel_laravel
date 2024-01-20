@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('device_history_id')->constrained('history_customer_devices')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
+            $table->text('tab')->nullable();
             $table->text('tag')->nullable();
             $table->text('last_value')->nullable();
             $table->text('submit_value')->nullable();

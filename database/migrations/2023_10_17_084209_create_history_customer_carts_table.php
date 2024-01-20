@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('device_history_id')->constrained('history_customer_devices')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->text('tag')->nullable();
+            $table->text('tab')->nullable();
             $table->foreignId('product_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->integer('count')->default(0);
+            $table->integer('before_count')->default(0);
+            $table->integer('increment_decrement')->default(0);
+            $table->integer('after_count')->default(0);
             $table->text('execute_time')->nullable();
             $table->text('status')->nullable();
             $table->text('message')->nullable();

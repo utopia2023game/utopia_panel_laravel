@@ -9,4 +9,5 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Specification extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $guarded = ['id'];
 }

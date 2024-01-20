@@ -9,4 +9,5 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class HistoryCustomerLike extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $guarded = ['id'];
 }

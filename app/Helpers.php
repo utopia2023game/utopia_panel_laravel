@@ -368,4 +368,24 @@ class Helper
         return $code;
 
     }
+
+    public static function generateUnique()
+    {
+
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        // $characters = '0123456789';
+        $charactersNumber = strlen($characters);
+        // $codeLength = 12;
+
+        $code = '';
+
+        while (strlen($code) < 12) {
+            $position = rand(0, $charactersNumber - 1);
+            $character = $characters[$position];
+            $code = $code . $character;
+        }
+
+        return $code;
+
+    }
 }

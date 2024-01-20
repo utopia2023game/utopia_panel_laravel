@@ -23,10 +23,10 @@ return new class extends Migration
             $table->text('model')->nullable(true);
             $table->text('html')->nullable(true);
             $table->text('ribbon')->nullable(true);
-            $table->double('weight')->nullable(true);
-            $table->double('width')->nullable(true);
-            $table->double('height')->nullable(true);
-            $table->double('length')->nullable(true);
+            $table->double('weight')->default(0.0);
+            $table->double('width')->default(0.0);
+            $table->double('height')->default(0.0);
+            $table->double('length')->default(0.0);
             $table->integer('stack_status')->default(0);
             $table->integer('stack_count')->nullable(true);
             $table->integer('stack_limit')->nullable(true);
@@ -44,8 +44,8 @@ return new class extends Migration
             $table->double('special_discount_percent')->nullable(true);
             $table->double('exceptional_discount_percent')->nullable(true);
             $table->integer('page_view')->default(0);
-            $table->integer('page_view_uniqe')->default(0);
-            $table->text('page_view_avg_time')->nullable();
+            $table->integer('page_view_unique')->default(0);
+            $table->integer('page_view_avg_time')->default(0);
             $table->integer('pay')->default(0);
             $table->integer('process')->default(0);
             $table->integer('delivery')->default(0);
