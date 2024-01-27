@@ -14,25 +14,34 @@ return new class extends Migration {
 
 
 
-        
+
         // if (Schema::hasTable('alarms')) {
         //     Schema::table('alarms', function (Blueprint $table) {
         //         $table->integer('delay_day_execute')->default(10)->after('priority');
         //     });
         // }
-        
-        // if (Schema::hasTable('history_customer_carts')) {
-        //     // Schema::table('history_customer_carts', function (Blueprint $table) {
-        //     //     $table->renameColumn('count', 'count_old');
-        //     // });
-        //     Schema::table('history_customer_carts', function (Blueprint $table) {
-        //         $table->integer('increment_decrement')->default(0)->after('before_count');
-        //     });
+
+        if (Schema::hasTable('history_customer_order_products')) {
+            Schema::table('history_customer_order_products', function (Blueprint $table) {
+                $table->renameColumn('order_times', 'all_order_times');
+                $table->renameColumn('order_last_date', 'all_order_last_date');
+            });
+            Schema::table('history_customer_order_products', function (Blueprint $table) {
+                $table->text('pending_order_times')->nullable()->after('all_purchase_sequence_day');
+                $table->text('pending_order_last_date')->nullable()->after('pending_order_times');
+                $table->text('delivered_order_times')->nullable()->after('pending_purchase_sequence_day');
+                $table->text('delivered_order_last_date')->nullable()->after('delivered_order_times');
+                $table->text('returned_order_times')->nullable()->after('delivered_purchase_sequence_day');
+                $table->text('returned_order_last_date')->nullable()->after('returned_order_times');
+                $table->text('canceled_order_times')->nullable()->after('returned_purchase_sequence_day');
+                $table->text('canceled_order_last_date')->nullable()->after('canceled_order_times');
+            });
+        }
 
         //     DB::table('history_customer_carts')->update([
         //         'increment_decrement' => DB::raw('count')   
         //     ]);
-        
+
         //     //Remove the old column:
         //     Schema::table('history_customer_carts', function(Blueprint $table)
         //     {

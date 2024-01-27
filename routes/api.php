@@ -1,11 +1,10 @@
 <?php
 
-use App\Http\Controllers\AlarmController;
-use App\Http\Controllers\AnalyticsCustomerController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\AlarmController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SliderController;
@@ -18,6 +17,8 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\HistoryCustomerController;
+use App\Http\Controllers\AnalyticsCustomerController;
+use App\Http\Controllers\HistoryCustomerOrderProductController;
 use App\Http\ControllersManagement\Controller as ManagementController;
 use App\Http\ControllersManagement\CategoryController as ManagementCategoryController;
 
@@ -83,6 +84,7 @@ Route::post('login_overview_with_password', [Controller::class, 'loginMobileOver
 Route::post('store_list', [StoreController::class, 'storeList'])->name('storeList');
 
 Route::post('list_order_status', [OrderStatusController::class, 'listOrdersStatus'])->name('listOrdersStatus');
+Route::post('order_product_table_refresh_all', [HistoryCustomerOrderProductController::class, 'set_hc_order_product_table_refresh_all'])->name('set_hc_order_product_table_refresh_all');
 
 Route::post('send_order_cart', [OrderController::class, 'sendOrderCart'])->name('sendOrderCart');
 Route::post('list_order', [OrderController::class, 'listOrders'])->name('listOrders');

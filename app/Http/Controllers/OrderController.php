@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HistoryCustomerOrderProduct;
 use Exception;
 use Throwable;
 use Carbon\Carbon;
@@ -106,7 +107,11 @@ class OrderController extends Controller
                                         $hcOrder['execute_time'] = Carbon::now()->toDateTimeString();
 
                                         // return $hcOrder;
-                                        HistoryCustomerOrder::create($hcOrder);
+                                        $create = HistoryCustomerOrder::create($hcOrder);
+
+                                        if ($create != null) {
+                                            $this->set_hc_order_product_table_refresh($input['customer_id'], $product_id, $create);
+                                        }
 
                                     } catch (\Throwable $th) {
                                         $result['result'] = false;
@@ -638,6 +643,19 @@ class OrderController extends Controller
         }
     }
 
+
+    
+
+    public function set_hc_order_product_table_refresh($customer_id, $product_id,$create)
+    {
+        // $orderProduct = HistoryCustomerOrderProduct::where('product_id', $product_id[$i])->first();
+
+        // for ($i = 0; $i < count($product_id); $i++) {
+        //     $orderProduct = HistoryCustomerOrderProduct::where('product_id', $product_id[$i])->first();
+
+        // }
+    }
+
     public function listOrders()
     {
         $input = Request()->all();
@@ -662,12 +680,12 @@ class OrderController extends Controller
                 $a = '';
                 if (Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
                     $res = Media::where('product_id', $ids[$j])->where('type', 'image')->where('priority', 1)->first();
-                    $a = $res->path;
+                    $a = $res->path ?? '';
                 }
 
                 if ($a == '' && Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
                     $res = Media::where('product_id', $ids[$j])->where('type', 'image')->first();
-                    $a = $res->path;
+                    $a = $res->path ?? '';
                 }
                 array_push($b['product_image'], $a);
 
@@ -710,12 +728,12 @@ class OrderController extends Controller
                 $a = '';
                 if (Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
                     $res = Media::where('product_id', $ids[$j])->where('type', 'image')->where('priority', 1)->first();
-                    $a = $res->path;
+                    $a = $res->path ?? '';
                 }
 
                 if ($a == '' && Media::where('product_id', $ids[$j])->where('type', 'image')->exists()) {
                     $res = Media::where('product_id', $ids[$j])->where('type', 'image')->first();
-                    $a = $res->path;
+                    $a = $res->path ?? '';
                 }
                 array_push($b['product_image'], $a);
             }
