@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('order_code');
             $table->foreignId('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('order_status_id')->constrained('order_statuses')->cascadeOnUpdate()->restrictOnDelete();
+            $table->integer('hc_order_product_status');
             $table->text('product_id');
             $table->Text('product_name');
             $table->Text('product_image')->nullable();

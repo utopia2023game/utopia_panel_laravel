@@ -20,6 +20,7 @@ use Hekmatinasser\Verta\Verta;
 use App\Models\HistoryCustomerOrder;
 use App\Models\HistoryCustomerDevice;
 use App\Http\Controllers\HistoryCustomerController;
+use PhpParser\Node\Stmt\TryCatch;
 
 class OrderController extends Controller
 {
@@ -92,26 +93,33 @@ class OrderController extends Controller
                                             $order = Order::create($input);
                                         }
 
-                                        $bank = Bank::where('id', $bid)->first();
+                                        $bank = Bank::where('id', $bid)->first() ?? '';
                                         $result['result'] = true;
                                         $result['callback_value'] = $bank->url;
                                         $result['message'] = 'checkingDataIsTrue';
 
-                                        $hcDevice_id = HistoryCustomerController::setAndGetDeviceInfoId($input['device_info'], $input['customer_id']);
+                                        try {
+                                            $hcDevice_id = HistoryCustomerController::setAndGetDeviceInfoId($input['device_info'], $input['customer_id']);
 
-                                        $hcOrder = array();
-                                        $hcOrder['device_history_id'] = $hcDevice_id;
-                                        $hcOrder['customer_id'] = $input['customer_id'];
-                                        $hcOrder['order_id'] = $order->id;
-                                        $hcOrder['order_status_id'] = 1; // default 1 means pay_paying
-                                        $hcOrder['execute_time'] = Carbon::now()->toDateTimeString();
+                                            $hcOrder = array();
+                                            $hcOrder['device_history_id'] = $hcDevice_id;
+                                            $hcOrder['customer_id'] = $input['customer_id'];
+                                            $hcOrder['order_id'] = $order->id;
+                                            $hcOrder['order_status_id'] = 1; // default 1 means pay_paying
+                                            $hcOrder['execute_time'] = Carbon::now()->toDateTimeString();
 
-                                        // return $hcOrder;
-                                        $create = HistoryCustomerOrder::create($hcOrder);
+                                            // return $hcOrder;
 
-                                        if ($create != null) {
-                                            $this->set_hc_order_product_table_refresh($input['customer_id'], $product_id, $create);
-                                        }
+                                            HistoryCustomerOrder::create($hcOrder);
+                                        } catch (\Throwable $th) {}
+                                        
+
+                                        try {
+                                            if ($order != null) {
+                                                $this->set_hc_order_product_table_refresh($input['customer_id'], $product_id, $order);
+                                            }
+                                        } catch (\Throwable $th) {}
+                                        
 
                                     } catch (\Throwable $th) {
                                         $result['result'] = false;
@@ -501,7 +509,6 @@ class OrderController extends Controller
                 if ($discounPrice > 0) {
                     $result['result'] = false;
                     $result['message'] = 'discountPricePlusZeroConfirmDiscountZero';
-                    ;
                 }
             }
         } else {
@@ -644,16 +651,161 @@ class OrderController extends Controller
     }
 
 
-    
 
-    public function set_hc_order_product_table_refresh($customer_id, $product_id,$create)
+
+    public function set_hc_order_product_table_refresh($customer_id, $product_id, $order)
     {
-        // $orderProduct = HistoryCustomerOrderProduct::where('product_id', $product_id[$i])->first();
+        for ($i = 0; $i < count($product_id); $i++) {
+            // echo ' product_id [$i] ' . ($product_id[$i]) . "\n";
+            if (HistoryCustomerOrderProduct::where('customer_id', $customer_id)->where('product_id', $product_id[$i])->exists()) {
+                $orderProduct = HistoryCustomerOrderProduct::where('customer_id', $customer_id)->where('product_id', $product_id[$i])->first();
 
-        // for ($i = 0; $i < count($product_id); $i++) {
-        //     $orderProduct = HistoryCustomerOrderProduct::where('product_id', $product_id[$i])->first();
+                $key = array_search($product_id[$i], $product_id);
 
-        // }
+                $order_status_id = $order->order_status_id;
+                if ($order_status_id <= 5) {
+                    $order_status = 'pending';
+                } else if ($order_status_id == 8) {
+                    $order_status = 'canceled';
+                } else if ($order_status_id == 14) {
+                    $order_status = 'returned';
+                } else if ($order_status_id == 6 || $order_status_id == 7) {
+                    $order_status = 'delivered';
+                }
+
+                $count_selected_array = json_decode($order->count_selected);
+                $count_selected = $count_selected_array[$key] ?? 1;
+                $sale_price_array = json_decode($order->sale_price);
+                $sale_price = $sale_price_array[$key] ?? 0;
+                $discount_price_array = json_decode($order->discount_price);
+                $discount_price = $discount_price_array[$key] ?? 0;
+                $count_discount = $discount_price > 0 ? 1 : 0;
+
+                $a = array();
+                $a['customer_id'] = $customer_id;
+                $a['product_id'] = $product_id[$i];
+
+                $a['all_order_times'] = intval($orderProduct->all_order_times) + 1;
+                $a['all_order_last_date'] = $order->created_at;
+                $a['all_count'] = intval($orderProduct->all_count) + $count_selected;
+                $a['all_avg_pay_price'] = round(((intval($orderProduct->all_avg_pay_price) * intval($orderProduct->all_order_times)) + $sale_price) / (intval($orderProduct->all_order_times) + 1));
+                $a['all_avg_discount'] = round(((intval($orderProduct->all_avg_discount) * intval($orderProduct->all_order_times)) + $discount_price) / (intval($orderProduct->all_order_times) + 1));
+                $a['all_count_discount'] = intval($orderProduct->all_count_discount) + $count_discount;
+                // $a['all_purchase_sequence_day'] = $orderProduct->all_purchase_sequence_day;
+
+
+                if ($order_status_id <= 5) {
+                    $order_status = 'pending';
+                    $a['pending_order_times'] = intval($orderProduct->pending_order_times) + 1;
+                    $a['pending_order_last_date'] = $order->created_at;
+                    $a['pending_count'] = intval($orderProduct->pending_count) + $count_selected;
+                    $a['pending_avg_pay_price'] = round(((intval($orderProduct->pending_avg_pay_price) * intval($orderProduct->pending_order_times)) + $sale_price) / (intval($orderProduct->pending_order_times) + 1));
+                    $a['pending_avg_discount'] = round(((intval($orderProduct->pending_avg_discount) * intval($orderProduct->pending_order_times)) + $discount_price) / (intval($orderProduct->pending_order_times) + 1));
+                    $a['pending_count_discount'] = intval($orderProduct->pending_count_discount) + $count_discount;
+                    // $a['pending_purchase_sequence_day'] = $orderProduct->pending_purchase_sequence_day;
+                } else if ($order_status_id == 8) {
+                    $order_status = 'canceled';
+                    $a['canceled_order_times'] = intval($orderProduct->canceled_order_times) + 1;
+                    $a['canceled_order_last_date'] = $order->created_at;
+                    $a['canceled_count'] = intval($orderProduct->canceled_count) + $count_selected;
+                    $a['canceled_avg_pay_price'] = round(((intval($orderProduct->canceled_avg_pay_price) * intval($orderProduct->canceled_order_times)) + $sale_price) / (intval($orderProduct->canceled_order_times) + 1));
+                    $a['canceled_avg_discount'] = round(((intval($orderProduct->canceled_avg_discount) * intval($orderProduct->canceled_order_times)) + $discount_price) / (intval($orderProduct->canceled_order_times) + 1));
+                    $a['canceled_count_discount'] = intval($orderProduct->canceled_count_discount) + $count_discount;
+                    // $a['cancel_purchase_sequence_day'] = $orderProduct->cancel_purchase_sequence_day;
+                } else if ($order_status_id == 14) {
+                    $order_status = 'returned';
+                    $a['returned_order_times'] = intval($orderProduct->returned_order_times) + 1;
+                    $a['returned_order_last_date'] = $order->created_at;
+                    $a['returned_count'] = intval($orderProduct->returned_count) + $count_selected;
+                    $a['returned_avg_pay_price'] = round(((intval($orderProduct->returned_avg_pay_price) * intval($orderProduct->delivered_order_times)) + $sale_price) / (intval($orderProduct->returned_order_times) + 1));
+                    $a['returned_avg_discount'] = round(((intval($orderProduct->returned_avg_discount) * intval($orderProduct->returned_order_times)) + $discount_price) / (intval($orderProduct->returned_order_times) + 1));
+                    $a['returned_count_discount'] = intval($orderProduct->returned_count_discount) + $count_discount;
+                    // $a['returned_purchase_sequence_day'] = $orderProduct->returned_purchase_sequence_day;
+                } else {
+                    $order_status = 'delivered';
+                    $a['delivered_order_times'] = intval($orderProduct->delivered_order_times) + 1;
+                    $a['delivered_order_last_date'] = $order->created_at;
+                    $a['delivered_count'] = intval($orderProduct->delivered_count) + $count_selected;
+                    $a['delivered_avg_pay_price'] = round(((intval($orderProduct->delivered_avg_pay_price) * intval($orderProduct->delivered_order_times)) + $sale_price) / (intval($orderProduct->delivered_order_times) + 1));
+                    $a['delivered_avg_discount'] = round(((intval($orderProduct->delivered_avg_discount) * intval($orderProduct->delivered_order_times)) + $discount_price) / (intval($orderProduct->delivered_order_times) + 1));
+                    $a['delivered_count_discount'] = intval($orderProduct->delivered_count_discount) + $count_discount;
+                    // $a['delivered_purchase_sequence_day'] = $orderProduct->delivered_purchase_sequence_day;
+
+                }
+
+                HistoryCustomerOrderProduct::where('customer_id', $customer_id)->where('product_id', $product_id[$i])->update($a);
+            } else {
+                $key = array_search($product_id[$i], $product_id);
+
+                $order_status_id = $order->order_status_id;
+                if ($order_status_id <= 5) {
+                    $order_status = 'pending';
+                } else if ($order_status_id == 8) {
+                    $order_status = 'canceled';
+                } else if ($order_status_id == 14) {
+                    $order_status = 'returned';
+                } else if ($order_status_id == 6 || $order_status_id == 7) {
+                    $order_status = 'delivered';
+                }
+
+                $count_selected_array = json_decode($order->count_selected);
+                $count_selected = $count_selected_array[$key] ?? 1;
+                $sale_price_array = json_decode($order->sale_price);
+                $sale_price = $sale_price_array[$key] ?? 0;
+                $discount_price_array = json_decode($order->discount_price);
+                $discount_price = $discount_price_array[$key] ?? 0;
+                $count_discount = $discount_price > 0 ? 1 : 0;
+
+
+                $a = array();
+                $a['customer_id'] = $customer_id;
+                $a['product_id'] = $product_id[$i];
+
+                $a['all_order_times'] = 1;
+                $a['all_order_last_date'] = $order->created_at;
+                $a['all_count'] = $count_selected;
+                $a['all_avg_pay_price'] = $sale_price;
+                $a['all_avg_discount'] = $discount_price;
+                $a['all_count_discount'] = $count_discount;
+                // $a['all_purchase_sequence_day'] = $orderProduct->all_purchase_sequence_day;
+
+                $a['pending_order_times'] = $order_status == 'pending' ? 1 : 0;
+                $a['pending_order_last_date'] = $order_status == 'pending' ? $order->created_at : null;
+                $a['pending_count'] = $order_status == 'pending' ? $count_selected : 0;
+                $a['pending_avg_pay_price'] = $order_status == 'pending' ? $sale_price : 0;
+                $a['pending_avg_discount'] = $order_status == 'pending' ? $discount_price : 0;
+                $a['pending_count_discount'] = $order_status == 'pending' ? $count_discount : 0;
+                // $a['pending_purchase_sequence_day'] = $orderProduct->pending_purchase_sequence_day;
+
+                $a['delivered_order_times'] = $order_status == 'delivered' ? 1 : 0;
+                $a['delivered_order_last_date'] = $order_status == 'delivered' ? $order->created_at : null;
+                $a['delivered_count'] = $order_status == 'delivered' ? $count_selected : 0;
+                $a['delivered_avg_pay_price'] = $order_status == 'delivered' ? $sale_price : 0;
+                $a['delivered_avg_discount'] = $order_status == 'delivered' ? $discount_price : 0;
+                $a['delivered_count_discount'] = $order_status == 'delivered' ? $count_discount : 0;
+                // $a['delivered_purchase_sequence_day'] = $orderProduct->delivered_purchase_sequence_day;
+
+                $a['returned_order_times'] = $order_status == 'returned' ? 1 : 0;
+                $a['returned_order_last_date'] = $order_status == 'returned' ? $order->created_at : null;
+                $a['returned_count'] = $order_status == 'returned' ? $count_selected : 0;
+                $a['returned_avg_pay_price'] = $order_status == 'returned' ? $sale_price : 0;
+                $a['returned_avg_discount'] = $order_status == 'returned' ? $discount_price : 0;
+                $a['returned_count_discount'] = $order_status == 'returned' ? $count_discount : 0;
+                // $a['returned_purchase_sequence_day'] = $orderProduct->returned_purchase_sequence_day;
+
+                $a['canceled_order_times'] = $order_status == 'canceled' ? 1 : 0;
+                $a['canceled_order_last_date'] = $order_status == 'canceled' ? $order->created_at : null;
+                $a['canceled_count'] = $order_status == 'canceled' ? $count_selected : 0;
+                $a['canceled_avg_pay_price'] = $order_status == 'canceled' ? $sale_price : 0;
+                $a['canceled_avg_discount'] = $order_status == 'canceled' ? $discount_price : 0;
+                $a['canceled_count_discount'] = $order_status == 'canceled' ? $count_discount : 0;
+                // $a['cancel_purchase_sequence_day'] = $orderProduct->cancel_purchase_sequence_day;
+
+                HistoryCustomerOrderProduct::create($a);
+            }
+        }
+        $hc_status['hc_order_product_status'] = 1;
+        Order::where('id' , $order->id)->update($hc_status);
     }
 
     public function listOrders()

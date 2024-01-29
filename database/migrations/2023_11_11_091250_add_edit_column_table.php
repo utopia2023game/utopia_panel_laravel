@@ -15,9 +15,9 @@ return new class extends Migration {
 
 
 
-        // if (Schema::hasTable('alarms')) {
-        //     Schema::table('alarms', function (Blueprint $table) {
-        //         $table->integer('delay_day_execute')->default(10)->after('priority');
+        // if (Schema::hasTable('orders')) {
+        //     Schema::table('orders', function (Blueprint $table) {
+        //         $table->integer('hc_order_product_status')->default(0)->after('order_status_id');
         //     });
         // }
 
