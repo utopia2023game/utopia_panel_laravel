@@ -21,22 +21,22 @@ return new class extends Migration {
         //     });
         // }
 
-        if (Schema::hasTable('history_customer_order_products')) {
-            Schema::table('history_customer_order_products', function (Blueprint $table) {
-                $table->renameColumn('order_times', 'all_order_times');
-                $table->renameColumn('order_last_date', 'all_order_last_date');
-            });
-            Schema::table('history_customer_order_products', function (Blueprint $table) {
-                $table->text('pending_order_times')->nullable()->after('all_purchase_sequence_day');
-                $table->text('pending_order_last_date')->nullable()->after('pending_order_times');
-                $table->text('delivered_order_times')->nullable()->after('pending_purchase_sequence_day');
-                $table->text('delivered_order_last_date')->nullable()->after('delivered_order_times');
-                $table->text('returned_order_times')->nullable()->after('delivered_purchase_sequence_day');
-                $table->text('returned_order_last_date')->nullable()->after('returned_order_times');
-                $table->text('canceled_order_times')->nullable()->after('returned_purchase_sequence_day');
-                $table->text('canceled_order_last_date')->nullable()->after('canceled_order_times');
-            });
-        }
+        // if (Schema::hasTable('history_customer_order_products')) {
+        //     Schema::table('history_customer_order_products', function (Blueprint $table) {
+        //         $table->renameColumn('order_times', 'all_order_times');
+        //         $table->renameColumn('order_last_date', 'all_order_last_date');
+        //     });
+        //     Schema::table('history_customer_order_products', function (Blueprint $table) {
+        //         $table->text('pending_order_times')->nullable()->after('all_purchase_sequence_day');
+        //         $table->text('pending_order_last_date')->nullable()->after('pending_order_times');
+        //         $table->text('delivered_order_times')->nullable()->after('pending_purchase_sequence_day');
+        //         $table->text('delivered_order_last_date')->nullable()->after('delivered_order_times');
+        //         $table->text('returned_order_times')->nullable()->after('delivered_purchase_sequence_day');
+        //         $table->text('returned_order_last_date')->nullable()->after('returned_order_times');
+        //         $table->text('canceled_order_times')->nullable()->after('returned_purchase_sequence_day');
+        //         $table->text('canceled_order_last_date')->nullable()->after('canceled_order_times');
+        //     });
+        // }
 
         //     DB::table('history_customer_carts')->update([
         //         'increment_decrement' => DB::raw('count')   
