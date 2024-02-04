@@ -110,7 +110,7 @@ class OrderController extends Controller
 
                                         try {
                                             if ($order != null) {
-                                                $this->set_hc_order_product_table_refresh($input['customer_id'], $product_id, $order);
+                                                $this->set_hc_order_product_table_refresh($input['customer_id'], $product_id, $order->id);
                                             }
                                         } catch (\Throwable $th) {}
 
@@ -629,453 +629,13 @@ class OrderController extends Controller
         }
     }
 
-    public function set_hc_order_product_table_refresh($customer_id, $product_id, $order)
+    public function set_hc_order_product_table_refresh($customer_id, $product_id, $order_id)
     {
-        for ($i = 0; $i < count($product_id); $i++) {
-            echo ' product_id [$i] ' . ($product_id[$i]) . "\n";
-
-            $order_status_id = $order->order_status_id;
-            $key = array_search($product_id[$i], $product_id);
-
-            $count_selected_array = json_decode($order->count_selected);
-            $count_selected = $count_selected_array[$key] ?? 1;
-            $sale_price_array = json_decode($order->sale_price);
-            $sale_price = $sale_price_array[$key] ?? 0;
-            $discount_price_array = json_decode($order->discount_price);
-            $discount_price = $discount_price_array[$key] ?? 0;
-            $order_discount_times = $discount_price > 0 ? 1 : 0;
-            try {
-                $delivery_price = intval($order->delivery_type_price);
-            } catch (\Throwable $th) {
-                $delivery_price = -1;
-            }
-            $order_discount_times = $discount_price > 0 ? 1 : 0;
-            try {
-                $all_count_products = intval($order->all_count_products);
-            } catch (\Throwable $th) {
-                $all_count_products = count($count_selected_array);
-            }
-            $all_order_free_delivery_times = $delivery_price == 0 ? 1 : 0;
-
-            if (HistoryCustomerOrderProduct::where('customer_id', $customer[$i]->id)->where('product_id', $product_id[$i])->exists()) {
-                $orderProduct = HistoryCustomerOrderProduct::where('customer_id', $customer[$i]->id)->where('product_id', $product_id[$i])->first();
-
-                $a = array();
-                $a['customer_id'] = $customer[$i]->id;
-                $a['product_id'] = $product_id[$i];
-
-                $a['all_order_times'] = intval($orderProduct->all_order_times) + 1;
-                $a['all_order_discount_times'] = intval($orderProduct->all_order_discount_times) + $order_discount_times;
-                $a['all_order_free_delivery_times'] = intval($orderProduct->all_order_free_delivery_times) + $all_order_free_delivery_times;
-                $a['all_product_count'] = intval($orderProduct->all_product_count) + $count_selected;
-                $a['all_product_discount_count'] = intval($orderProduct->all_product_discount_count) + ($order_discount_times * $count_selected);
-                $a['all_product_free_delivery_count'] = intval($orderProduct->all_product_free_delivery_count) + ($all_order_free_delivery_times * $count_selected);
-                $a['all_total_product_pay_price'] = intval($orderProduct->all_total_product_pay_price) + round($sale_price * $count_selected);
-                $a['all_total_product_discount'] = intval($orderProduct->all_total_product_discount) + round($order_discount_times * $discount_price * $count_selected);
-                $a['all_avg_product_pay_price'] = round($a['all_total_product_pay_price'] / $a['all_product_count']);
-                $a['all_avg_product_discount'] = $a['all_product_discount_count'] > 0 ? round($a['all_total_product_discount'] / $a['all_product_discount_count']) : 0;
-                $a['all_total_order_delivery'] = intval($orderProduct->all_total_order_delivery) + round($delivery_price);
-                $a['all_total_product_delivery'] = intval($orderProduct->all_total_product_delivery) + round($delivery_price / $all_count_products);
-                $a['all_avg_product_delivery'] = ($a['all_product_count'] - $a['all_product_free_delivery_count']) > 0 ? round($a['all_total_product_delivery'] / ($a['all_product_count'] - $a['all_product_free_delivery_count'])) : 0;
-                $a['all_order_last_date'] = verta($order->created_at);
-
-                $fristDate = $orderProduct->all_order_first_date;
-                $lastDatelast = $orderProduct->all_order_last_date;
-                $lastDateNow = strval(verta($order->created_at));
-                $lastDate = SUBSTR($lastDateNow, 0, 10);
-                $diffDays = verta($lastDatelast)->diffDays($lastDateNow, false);
-                $diffDaysWithFirst = verta($lastDatelast)->diffDays($fristDate, false);
-
-                // dd($fristDate, $lastDatelast ,$lastDateNow , $lastDate, $diffDays ,$diffDaysWithFirst);
-                $all_purchase_date = array();
-                // dd(json_decode($orderProduct->all_purchase_date) ,json_decode('["1402-11-09"]'), $orderProduct->all_purchase_date);
-                $orderProduct->all_purchase_date != null ? $all_purchase_date = json_decode($orderProduct->all_purchase_date) : null;
-                array_push($all_purchase_date, $lastDate);
-
-                $all_purchase_day = array();
-                $orderProduct->all_purchase_date != null ? $all_purchase_day = json_decode($orderProduct->all_purchase_day) : null;
-                array_push($all_purchase_day, abs($diffDaysWithFirst));
-
-                $all_purchase_sequence_day = array();
-                $orderProduct->all_purchase_date != null ? $all_purchase_sequence_day = json_decode($orderProduct->all_purchase_sequence_day) : null;
-                // if ($customer[$i]->id == 2 && $product_id[$i]) {
-                //     echo $diffDays . "\n";
-                // }
-                array_push($all_purchase_sequence_day, abs($diffDays));
-
-                // $all_purchase_sequence_day = array_filter($all_purchase_sequence_day);
-                // dd(array_sum($all_purchase_sequence_day), count($all_purchase_sequence_day));
-                $all_purchase_avg_sequence_day = count($all_purchase_sequence_day) == 0 ? 0 : array_sum($all_purchase_sequence_day) / count($all_purchase_sequence_day);
-
-                $all_purchase_pressture_day = $this->get_pressture_day($all_purchase_sequence_day);
-                $all_purchase_power_in_month = $this->get_power_in_month($all_purchase_date);
-                $all_purchase_power_in_year = $this->get_power_in_year($all_purchase_date);
-
-                // $k == 2 ? dd($k, $all_purchase_date, $all_purchase_day, $all_purchase_sequence_day, $all_purchase_avg_sequence_day, $all_purchase_pressture_day, $all_purchase_power_in_month, $all_purchase_pressture_day) : null;
-
-                $a['all_purchase_date'] = $all_purchase_date;
-                $a['all_purchase_day'] = $all_purchase_day;
-                $a['all_purchase_total_day'] = abs($diffDaysWithFirst);
-                $a['all_purchase_sequence_day'] = $all_purchase_sequence_day;
-                $a['all_purchase_avg_sequence_day'] = round($all_purchase_avg_sequence_day);
-                $a['all_purchase_pressture_day'] = $all_purchase_pressture_day;
-                $a['all_purchase_power_in_month'] = $all_purchase_power_in_month;
-                $a['all_purchase_power_in_year'] = $all_purchase_power_in_year;
-
-                if ($order_status_id <= 5) {
-                    // $order_status = 'pending';
-
-                    $a['pending_order_times'] = intval($orderProduct->pending_order_times) + 1;
-                    $a['pending_order_discount_times'] = intval($orderProduct->pending_order_discount_times) + $order_discount_times;
-                    $a['pending_order_free_delivery_times'] = intval($orderProduct->pending_order_free_delivery_times) + $all_order_free_delivery_times;
-                    $a['pending_product_count'] = intval($orderProduct->pending_product_count) + $count_selected;
-                    $a['pending_product_discount_count'] = intval($orderProduct->pending_product_discount_count) + ($order_discount_times * $count_selected);
-                    $a['pending_product_free_delivery_count'] = intval($orderProduct->pending_product_free_delivery_count) + ($all_order_free_delivery_times * $count_selected);
-                    $a['pending_total_product_pay_price'] = intval($orderProduct->pending_total_product_pay_price) + round($sale_price * $count_selected);
-                    $a['pending_total_product_discount'] = intval($orderProduct->pending_total_product_discount) + round($order_discount_times * $discount_price * $count_selected);
-                    $a['pending_avg_product_pay_price'] = round($a['pending_total_product_pay_price'] / $a['pending_product_count']);
-                    $a['pending_avg_product_discount'] = $a['pending_product_discount_count'] > 0 ? round($a['pending_total_product_discount'] / $a['pending_product_discount_count']) : 0;
-                    $a['pending_total_order_delivery'] = intval($orderProduct->pending_total_order_delivery) + round($delivery_price);
-                    $a['pending_total_product_delivery'] = intval($orderProduct->pending_total_product_delivery) + round($delivery_price / $all_count_products);
-                    $a['pending_avg_product_delivery'] = ($a['pending_product_count'] - $a['pending_product_free_delivery_count']) > 0 ? round($a['pending_total_product_delivery'] / ($a['pending_product_count'] - $a['pending_product_free_delivery_count'])) : 0;
-                    $a['pending_order_last_date'] = verta($order->created_at);
-
-                    $fristDate = verta($orderProduct->pending_order_first_date);
-                    $lastDatelast = verta($orderProduct->pending_order_last_date);
-                    $lastDateNow = strval(verta($order->created_at));
-                    $lastDate = SUBSTR($lastDateNow, 0, 10);
-                    $diffDays = verta($lastDatelast)->diffDays($lastDateNow, false);
-                    $diffDaysWithFirst = verta($lastDatelast)->diffDays($fristDate, false);
-
-                    $pending_purchase_date = array();
-                    $orderProduct->pending_purchase_date != null ? $pending_purchase_date = json_decode($orderProduct->pending_purchase_date) : null;
-                    array_push($pending_purchase_date, $lastDate);
-
-                    $pending_purchase_day = array();
-                    $orderProduct->pending_purchase_date != null ? $pending_purchase_day = json_decode($orderProduct->pending_purchase_day) : null;
-                    array_push($pending_purchase_day, abs($diffDaysWithFirst));
-
-                    $pending_purchase_sequence_day = array();
-                    $orderProduct->pending_purchase_date != null ? $pending_purchase_sequence_day = json_decode($orderProduct->pending_purchase_sequence_day) : null;
-                    array_push($pending_purchase_sequence_day, abs($diffDays));
-
-                    $pending_purchase_sequence_day = array_filter($pending_purchase_sequence_day);
-                    $pending_purchase_avg_sequence_day = count($pending_purchase_sequence_day) == 0 ? 0 : array_sum($pending_purchase_sequence_day) / count($pending_purchase_sequence_day);
-
-                    $pending_purchase_pressture_day = $this->get_pressture_day($pending_purchase_sequence_day);
-                    $pending_purchase_power_in_month = $this->get_power_in_month($pending_purchase_date);
-                    $pending_purchase_power_in_year = $this->get_power_in_year($pending_purchase_date);
-
-                    $a['pending_purchase_date'] = $pending_purchase_date;
-                    $a['pending_purchase_day'] = $pending_purchase_day;
-                    $a['pending_purchase_total_day'] = abs($diffDaysWithFirst);
-                    $a['pending_purchase_sequence_day'] = $pending_purchase_sequence_day;
-                    $a['pending_purchase_avg_sequence_day'] = round($pending_purchase_avg_sequence_day);
-                    $a['pending_purchase_pressture_day'] = $pending_purchase_pressture_day;
-                    $a['pending_purchase_power_in_month'] = $pending_purchase_power_in_month;
-                    $a['pending_purchase_power_in_year'] = $pending_purchase_power_in_year;
-                } else if ($order_status_id == 8) {
-                    // $order_status = 'canceled';
-
-                    $a['canceled_order_times'] = intval($orderProduct->canceled_order_times) + 1;
-                    $a['canceled_order_discount_times'] = intval($orderProduct->canceled_order_discount_times) + $order_discount_times;
-                    $a['canceled_order_free_delivery_times'] = intval($orderProduct->canceled_order_free_delivery_times) + $all_order_free_delivery_times;
-                    $a['canceled_product_count'] = intval($orderProduct->canceled_product_count) + $count_selected;
-                    $a['canceled_product_discount_count'] = intval($orderProduct->canceled_product_discount_count) + ($order_discount_times * $count_selected);
-                    $a['canceled_product_free_delivery_count'] = intval($orderProduct->canceled_product_free_delivery_count) + ($all_order_free_delivery_times * $count_selected);
-                    $a['canceled_total_product_pay_price'] = intval($orderProduct->canceled_total_product_pay_price) + round($sale_price * $count_selected);
-                    $a['canceled_total_product_discount'] = intval($orderProduct->canceled_total_product_discount) + round($order_discount_times * $discount_price * $count_selected);
-                    $a['canceled_avg_product_pay_price'] = round($a['canceled_total_product_pay_price'] / $a['canceled_product_count']);
-                    $a['canceled_avg_product_discount'] = $a['canceled_product_discount_count'] > 0 ? round($a['canceled_total_product_discount'] / $a['canceled_product_discount_count']) : 0;
-                    $a['canceled_total_order_delivery'] = intval($orderProduct->canceled_total_order_delivery) + round($delivery_price);
-                    $a['canceled_total_product_delivery'] = intval($orderProduct->canceled_total_product_delivery) + round($delivery_price / $all_count_products);
-                    $a['canceled_avg_product_delivery'] = ($a['canceled_product_count'] - $a['canceled_product_free_delivery_count']) > 0 ? round($a['canceled_total_product_delivery'] / ($a['canceled_product_count'] - $a['canceled_product_free_delivery_count'])) : 0;
-                    $a['canceled_order_last_date'] = verta($order->created_at);
-
-                    $fristDate = verta($orderProduct->canceled_order_first_date);
-                    $lastDatelast = verta($orderProduct->canceled_order_last_date);
-                    $lastDateNow = strval(verta($order->created_at));
-                    $lastDate = SUBSTR($lastDateNow, 0, 10);
-                    $diffDays = verta($lastDatelast)->diffDays($lastDateNow, false);
-                    $diffDaysWithFirst = verta($lastDatelast)->diffDays($fristDate, false);
-
-                    $canceled_purchase_date = array();
-                    $orderProduct->canceled_purchase_date != null ? $canceled_purchase_date = json_decode($orderProduct->canceled_purchase_date) : null;
-                    array_push($canceled_purchase_date, $lastDate);
-
-                    $canceled_purchase_day = array();
-                    $orderProduct->canceled_purchase_date != null ? $canceled_purchase_day = json_decode($orderProduct->canceled_purchase_day) : null;
-                    array_push($canceled_purchase_day, abs($diffDaysWithFirst));
-
-                    $canceled_purchase_sequence_day = array();
-                    $orderProduct->canceled_purchase_date != null ? $canceled_purchase_sequence_day = json_decode($orderProduct->canceled_purchase_sequence_day) : null;
-                    array_push($canceled_purchase_sequence_day, abs($diffDays));
-
-                    $canceled_purchase_sequence_day = array_filter($canceled_purchase_sequence_day);
-                    $canceled_purchase_avg_sequence_day = count($canceled_purchase_sequence_day) == 0 ? 0 : array_sum($canceled_purchase_sequence_day) / count($canceled_purchase_sequence_day);
-
-                    $canceled_purchase_pressture_day = $this->get_pressture_day($canceled_purchase_sequence_day);
-                    $canceled_purchase_power_in_month = $this->get_power_in_month($canceled_purchase_date);
-                    $canceled_purchase_power_in_year = $this->get_power_in_year($canceled_purchase_date);
-
-                    $a['canceled_purchase_date'] = $canceled_purchase_date;
-                    $a['canceled_purchase_day'] = $canceled_purchase_day;
-                    $a['canceled_purchase_total_day'] = abs($diffDaysWithFirst);
-                    $a['canceled_purchase_sequence_day'] = $canceled_purchase_sequence_day;
-                    $a['canceled_purchase_avg_sequence_day'] = round($canceled_purchase_avg_sequence_day);
-                    $a['canceled_purchase_pressture_day'] = $canceled_purchase_pressture_day;
-                    $a['canceled_purchase_power_in_month'] = $canceled_purchase_power_in_month;
-                    $a['canceled_purchase_power_in_year'] = $canceled_purchase_power_in_year;
-                } else if ($order_status_id == 14) {
-                    // $order_status = 'returned';
-                    $a['returned_order_times'] = intval($orderProduct->returned_order_times) + 1;
-                    $a['returned_order_discount_times'] = intval($orderProduct->returned_order_discount_times) + $order_discount_times;
-                    $a['returned_order_free_delivery_times'] = intval($orderProduct->returned_order_free_delivery_times) + $all_order_free_delivery_times;
-                    $a['returned_product_count'] = intval($orderProduct->returned_product_count) + $count_selected;
-                    $a['returned_product_discount_count'] = intval($orderProduct->returned_product_discount_count) + ($order_discount_times * $count_selected);
-                    $a['returned_product_free_delivery_count'] = intval($orderProduct->returned_product_free_delivery_count) + ($all_order_free_delivery_times * $count_selected);
-                    $a['returned_total_product_pay_price'] = intval($orderProduct->returned_total_product_pay_price) + round($sale_price * $count_selected);
-                    $a['returned_total_product_discount'] = intval($orderProduct->returned_total_product_discount) + round($order_discount_times * $discount_price * $count_selected);
-                    $a['returned_avg_product_pay_price'] = round($a['returned_total_product_pay_price'] / $a['returned_product_count']);
-                    $a['returned_avg_product_discount'] = $a['returned_product_discount_count'] > 0 ? round($a['returned_total_product_discount'] / $a['returned_product_discount_count']) : 0;
-                    $a['returned_total_order_delivery'] = intval($orderProduct->returned_total_order_delivery) + round($delivery_price);
-                    $a['returned_total_product_delivery'] = intval($orderProduct->returned_total_product_delivery) + round($delivery_price / $all_count_products);
-                    $a['returned_avg_product_delivery'] = ($a['returned_product_count'] - $a['returned_product_free_delivery_count']) > 0 ? round($a['returned_total_product_delivery'] / ($a['returned_product_count'] - $a['returned_product_free_delivery_count'])) : 0;
-                    $a['returned_order_last_date'] = verta($order->created_at);
-
-                    $fristDate = verta($orderProduct->returned_order_first_date);
-                    $lastDatelast = verta($orderProduct->returned_order_last_date);
-                    $lastDateNow = strval(verta($order->created_at));
-                    $lastDate = SUBSTR($lastDateNow, 0, 10);
-                    $diffDays = verta($lastDatelast)->diffDays($lastDateNow, false);
-                    $diffDaysWithFirst = verta($lastDatelast)->diffDays($fristDate, false);
-
-                    $returned_purchase_date = array();
-                    $orderProduct->returned_purchase_date != null ? $returned_purchase_date = json_decode($orderProduct->returned_purchase_date) : null;
-                    array_push($returned_purchase_date, $lastDate);
-
-                    $returned_purchase_day = array();
-                    $orderProduct->returned_purchase_date != null ? $returned_purchase_day = json_decode($orderProduct->returned_purchase_day) : null;
-                    array_push($returned_purchase_day, abs($diffDaysWithFirst));
-
-                    $returned_purchase_sequence_day = array();
-                    $orderProduct->returned_purchase_date != null ? $returned_purchase_sequence_day = json_decode($orderProduct->returned_purchase_sequence_day) : null;
-                    array_push($returned_purchase_sequence_day, abs($diffDays));
-
-                    $returned_purchase_sequence_day = array_filter($returned_purchase_sequence_day);
-                    $returned_purchase_avg_sequence_day = count($returned_purchase_sequence_day) == 0 ? 0 : array_sum($returned_purchase_sequence_day) / count($returned_purchase_sequence_day);
-
-                    $returned_purchase_pressture_day = $this->get_pressture_day($returned_purchase_sequence_day);
-                    $returned_purchase_power_in_month = $this->get_power_in_month($returned_purchase_date);
-                    $returned_purchase_power_in_year = $this->get_power_in_year($returned_purchase_date);
-
-                    $a['returned_purchase_date'] = $returned_purchase_date;
-                    $a['returned_purchase_day'] = $returned_purchase_day;
-                    $a['returned_purchase_total_day'] = abs($diffDaysWithFirst);
-                    $a['returned_purchase_sequence_day'] = $returned_purchase_sequence_day;
-                    $a['returned_purchase_avg_sequence_day'] = round($returned_purchase_avg_sequence_day);
-                    $a['returned_purchase_pressture_day'] = $returned_purchase_pressture_day;
-                    $a['returned_purchase_power_in_month'] = $returned_purchase_power_in_month;
-                    $a['returned_purchase_power_in_year'] = $returned_purchase_power_in_year;
-                } else {
-                    // $order_status = 'delivered';
-                    $a['delivered_order_times'] = intval($orderProduct->delivered_order_times) + 1;
-                    $a['delivered_order_discount_times'] = intval($orderProduct->delivered_order_discount_times) + $order_discount_times;
-                    $a['delivered_order_free_delivery_times'] = intval($orderProduct->delivered_order_free_delivery_times) + $all_order_free_delivery_times;
-                    $a['delivered_product_count'] = intval($orderProduct->delivered_product_count) + $count_selected;
-                    $a['delivered_product_discount_count'] = intval($orderProduct->delivered_product_discount_count) + ($order_discount_times * $count_selected);
-                    $a['delivered_product_free_delivery_count'] = intval($orderProduct->delivered_product_free_delivery_count) + ($all_order_free_delivery_times * $count_selected);
-                    $a['delivered_total_product_pay_price'] = intval($orderProduct->delivered_total_product_pay_price) + round($sale_price * $count_selected);
-                    $a['delivered_total_product_discount'] = intval($orderProduct->delivered_total_product_discount) + round($order_discount_times * $discount_price * $count_selected);
-                    $a['delivered_avg_product_pay_price'] = round($a['delivered_total_product_pay_price'] / $a['delivered_product_count']);
-                    $a['delivered_avg_product_discount'] = $a['delivered_product_discount_count'] > 0 ? round($a['delivered_total_product_discount'] / $a['delivered_product_discount_count']) : 0;
-                    $a['delivered_total_order_delivery'] = intval($orderProduct->delivered_total_order_delivery) + round($delivery_price);
-                    $a['delivered_total_product_delivery'] = intval($orderProduct->delivered_total_product_delivery) + round($delivery_price / $all_count_products);
-                    $a['delivered_avg_product_delivery'] = ($a['delivered_product_count'] - $a['delivered_product_free_delivery_count']) > 0 ? round($a['delivered_total_product_delivery'] / ($a['delivered_product_count'] - $a['delivered_product_free_delivery_count'])) : 0;
-                    $a['delivered_order_last_date'] = verta($order->created_at);
-
-                    $fristDate = verta($orderProduct->delivered_order_first_date);
-                    $lastDatelast = verta($orderProduct->delivered_order_last_date);
-                    $lastDateNow = strval(verta($order->created_at));
-                    $lastDate = SUBSTR($lastDateNow, 0, 10);
-                    $diffDays = verta($lastDatelast)->diffDays($lastDateNow, false);
-                    $diffDaysWithFirst = verta($lastDatelast)->diffDays($fristDate, false);
-
-                    $delivered_purchase_date = array();
-                    $orderProduct->delivered_purchase_date != null ? $delivered_purchase_date = json_decode($orderProduct->delivered_purchase_date) : null;
-                    array_push($delivered_purchase_date, $lastDate);
-
-                    $delivered_purchase_day = array();
-                    $orderProduct->delivered_purchase_date != null ? $delivered_purchase_day = json_decode($orderProduct->delivered_purchase_day) : null;
-                    array_push($delivered_purchase_day, abs($diffDaysWithFirst));
-
-                    $delivered_purchase_sequence_day = array();
-                    $orderProduct->delivered_purchase_date != null ? $delivered_purchase_sequence_day = json_decode($orderProduct->delivered_purchase_sequence_day) : null;
-                    array_push($delivered_purchase_sequence_day, abs($diffDays));
-
-                    $delivered_purchase_sequence_day = array_filter($delivered_purchase_sequence_day);
-                    $delivered_purchase_avg_sequence_day = count($delivered_purchase_sequence_day) == 0 ? 0 : array_sum($delivered_purchase_sequence_day) / count($delivered_purchase_sequence_day);
-
-                    $delivered_purchase_pressture_day = $this->get_pressture_day($delivered_purchase_sequence_day);
-                    $delivered_purchase_power_in_month = $this->get_power_in_month($delivered_purchase_date);
-                    $delivered_purchase_power_in_year = $this->get_power_in_year($delivered_purchase_date);
-
-                    $a['delivered_purchase_date'] = $delivered_purchase_date;
-                    $a['delivered_purchase_day'] = $delivered_purchase_day;
-                    $a['delivered_purchase_total_day'] = abs($diffDaysWithFirst);
-                    $a['delivered_purchase_sequence_day'] = $delivered_purchase_sequence_day;
-                    $a['delivered_purchase_avg_sequence_day'] = round($delivered_purchase_avg_sequence_day);
-                    $a['delivered_purchase_pressture_day'] = $delivered_purchase_pressture_day;
-                    $a['delivered_purchase_power_in_month'] = $delivered_purchase_power_in_month;
-                    $a['delivered_purchase_power_in_year'] = $delivered_purchase_power_in_year;
-
-                }
-
-                HistoryCustomerOrderProduct::where('customer_id', $customer[$i]->id)->where('product_id', $product_id[$i])->update($a);
-            } else {
-
-                if ($order_status_id <= 5) {
-                    $order_status = 'pending';
-                } else if ($order_status_id == 8) {
-                    $order_status = 'canceled';
-                } else if ($order_status_id == 14) {
-                    $order_status = 'returned';
-                } else {
-                    $order_status = 'delivered';
-                }
-
-                $all_purchase_power_in_month = $this->get_power_in_month([$order->created_at]);
-                $all_purchase_power_in_year = $this->get_power_in_year([$order->created_at]);
-
-                $a = array();
-                $a['customer_id'] = $customer[$i]->id;
-                $a['product_id'] = $product_id[$i];
-
-                $a['all_order_times'] = 1;
-                $a['all_order_discount_times'] = $order_discount_times;
-                $a['all_order_free_delivery_times'] = $all_order_free_delivery_times;
-                $a['all_product_count'] = $count_selected;
-                $a['all_product_discount_count'] = $order_discount_times * $count_selected;
-                $a['all_product_free_delivery_count'] = $all_order_free_delivery_times * $count_selected;
-                $a['all_total_product_pay_price'] = round($sale_price * $count_selected);
-                $a['all_total_product_discount'] = round($order_discount_times * $discount_price * $count_selected);
-                $a['all_avg_product_pay_price'] = round($a['all_total_product_pay_price'] / $a['all_product_count']);
-                $a['all_avg_product_discount'] = $order_discount_times > 0 ? round($a['all_total_product_discount'] / $a['all_product_discount_count']) : 0;
-                $a['all_total_order_delivery'] = round($delivery_price);
-                $a['all_total_product_delivery'] = round($delivery_price / $all_count_products);
-                $a['all_avg_product_delivery'] = ($a['all_product_count'] - $a['all_product_free_delivery_count']) > 0 ? round($a['all_total_product_delivery'] / ($a['all_product_count'] - $a['all_product_free_delivery_count'])) : 0;
-                $a['all_order_first_date'] = verta($order->created_at);
-                $a['all_order_last_date'] = verta($order->created_at);
-                $a['all_purchase_date'] = '["' . verta($order->created_at) . '"]';
-                $a['all_purchase_day'] = '[0]';
-                $a['all_purchase_total_day'] = 0;
-                $a['all_purchase_sequence_day'] = '[]';
-                $a['all_purchase_avg_sequence_day'] = 0;
-                $a['all_purchase_pressture_day'] = 'first';
-                $a['all_purchase_power_in_month'] = $all_purchase_power_in_month;
-                $a['all_purchase_power_in_year'] = $all_purchase_power_in_year;
-
-                $a['pending_order_times'] = $order_status == 'pending' ? 1 : 0;
-                $a['pending_order_discount_times'] = $order_status == 'pending' ? $order_discount_times : 0;
-                $a['pending_order_free_delivery_times'] = $order_status == 'pending' ? $all_order_free_delivery_times : 0;
-                $a['pending_product_count'] = $order_status == 'pending' ? $count_selected : 0;
-                $a['pending_product_discount_count'] = $order_status == 'pending' ? $order_discount_times * $count_selected : 0;
-                $a['pending_product_free_delivery_count'] = $order_status == 'pending' ? $all_order_free_delivery_times * $count_selected : 0;
-                $a['pending_total_product_pay_price'] = $order_status == 'pending' ? round($sale_price * $count_selected) : 0;
-                $a['pending_total_product_discount'] = $order_status == 'pending' ? round($order_discount_times * $discount_price * $count_selected) : 0;
-                $a['pending_avg_product_pay_price'] = $order_status == 'pending' ? round($a['pending_total_product_pay_price'] / $a['pending_product_count']) : 0;
-                $a['pending_avg_product_discount'] = $order_status == 'pending' ? $order_discount_times > 0 ? round($a['pending_total_product_discount'] / $a['pending_product_discount_count']) : 0 : 0;
-                $a['pending_total_order_delivery'] = $order_status == 'pending' ? round($delivery_price) : 0;
-                $a['pending_total_product_delivery'] = $order_status == 'pending' ? round($delivery_price / $all_count_products) : 0;
-                $a['pending_avg_product_delivery'] = $order_status == 'pending' ? ($a['pending_product_count'] - $a['pending_product_free_delivery_count']) > 0 ? round($a['pending_total_product_delivery'] / ($a['pending_product_count'] - $a['pending_product_free_delivery_count'])) : 0 : 0;
-                $a['pending_order_first_date'] = $order_status == 'pending' ? verta($order->created_at) : null;
-                $a['pending_order_last_date'] = $order_status == 'pending' ? verta($order->created_at) : null;
-                $a['pending_purchase_date'] = $order_status == 'pending' ? '["' . verta($order->created_at) . '"]' : '[]';
-                $a['pending_purchase_day'] = $order_status == 'pending' ? '[0]' : '[]';
-                $a['pending_purchase_total_day'] = 0;
-                $a['pending_purchase_sequence_day'] = '[]';
-                $a['pending_purchase_avg_sequence_day'] = 0;
-                $a['pending_purchase_pressture_day'] = $order_status == 'pending' ? 'first' : null;
-                $a['pending_purchase_power_in_month'] = $order_status == 'pending' ? $all_purchase_power_in_month : null;
-                $a['pending_purchase_power_in_year'] = $order_status == 'pending' ? $all_purchase_power_in_year : null;
-
-                $a['delivered_order_times'] = $order_status == 'delivered' ? 1 : 0;
-                $a['delivered_order_discount_times'] = $order_status == 'delivered' ? $order_discount_times : 0;
-                $a['delivered_order_free_delivery_times'] = $order_status == 'delivered' ? $all_order_free_delivery_times : 0;
-                $a['delivered_product_count'] = $order_status == 'delivered' ? $count_selected : 0;
-                $a['delivered_product_discount_count'] = $order_status == 'delivered' ? $order_discount_times * $count_selected : 0;
-                $a['delivered_product_free_delivery_count'] = $order_status == 'delivered' ? $all_order_free_delivery_times * $count_selected : 0;
-                $a['delivered_total_product_pay_price'] = $order_status == 'delivered' ? round($sale_price * $count_selected) : 0;
-                $a['delivered_total_product_discount'] = $order_status == 'delivered' ? round($order_discount_times * $discount_price * $count_selected) : 0;
-                $a['delivered_avg_product_pay_price'] = $order_status == 'delivered' ? round($a['delivered_total_product_pay_price'] / $a['delivered_product_count']) : 0;
-                $a['delivered_avg_product_discount'] = $order_status == 'delivered' ? $order_discount_times > 0 ? round($a['delivered_total_product_discount'] / $a['delivered_product_discount_count']) : 0 : 0;
-                $a['delivered_total_order_delivery'] = $order_status == 'delivered' ? round($delivery_price) : 0;
-                $a['delivered_total_product_delivery'] = $order_status == 'delivered' ? round($delivery_price / $all_count_products) : 0;
-                $a['delivered_avg_product_delivery'] = $order_status == 'delivered' ? ($a['delivered_product_count'] - $a['delivered_product_free_delivery_count']) > 0 ? round($a['delivered_total_product_delivery'] / ($a['delivered_product_count'] - $a['delivered_product_free_delivery_count'])) : 0 : 0;
-                $a['delivered_order_first_date'] = $order_status == 'delivered' ? verta($order->created_at) : null;
-                $a['delivered_order_last_date'] = $order_status == 'delivered' ? verta($order->created_at) : null;
-                $a['delivered_purchase_date'] = $order_status == 'delivered' ? '["' . verta($order->created_at) . '"]' : '[]';
-                $a['delivered_purchase_day'] = $order_status == 'delivered' ? '[0]' : '[]';
-                $a['delivered_purchase_total_day'] = 0;
-                $a['delivered_purchase_sequence_day'] = '[]';
-                $a['delivered_purchase_avg_sequence_day'] = 0;
-                $a['delivered_purchase_pressture_day'] = $order_status == 'delivered' ? 'first' : null;
-                $a['delivered_purchase_power_in_month'] = $order_status == 'delivered' ? $all_purchase_power_in_month : null;
-                $a['delivered_purchase_power_in_year'] = $order_status == 'delivered' ? $all_purchase_power_in_year : null;
-
-                $a['returned_order_times'] = $order_status == 'returned' ? 1 : 0;
-                $a['returned_order_discount_times'] = $order_status == 'returned' ? $order_discount_times : 0;
-                $a['returned_order_free_delivery_times'] = $order_status == 'returned' ? $all_order_free_delivery_times : 0;
-                $a['returned_product_count'] = $order_status == 'returned' ? $count_selected : 0;
-                $a['returned_product_discount_count'] = $order_status == 'returned' ? $order_discount_times * $count_selected : 0;
-                $a['returned_product_free_delivery_count'] = $order_status == 'returned' ? $all_order_free_delivery_times * $count_selected : 0;
-                $a['returned_total_product_pay_price'] = $order_status == 'returned' ? round($sale_price * $count_selected) : 0;
-                $a['returned_total_product_discount'] = $order_status == 'returned' ? round($order_discount_times * $discount_price * $count_selected) : 0;
-                $a['returned_avg_product_pay_price'] = $order_status == 'returned' ? round($a['returned_total_product_pay_price'] / $a['returned_product_count']) : 0;
-                $a['returned_avg_product_discount'] = $order_status == 'returned' ? $order_discount_times > 0 ? round($a['returned_total_product_discount'] / $a['returned_product_discount_count']) : 0 : 0;
-                $a['returned_total_order_delivery'] = $order_status == 'returned' ? round($delivery_price) : 0;
-                $a['returned_total_product_delivery'] = $order_status == 'returned' ? round($delivery_price / $all_count_products) : 0;
-                $a['returned_avg_product_delivery'] = $order_status == 'returned' ? ($a['returned_product_count'] - $a['returned_product_free_delivery_count']) > 0 ? round($a['returned_total_product_delivery'] / ($a['returned_product_count'] - $a['returned_product_free_delivery_count'])) : 0 : 0;
-                $a['returned_order_first_date'] = $order_status == 'returned' ? verta($order->created_at) : null;
-                $a['returned_order_last_date'] = $order_status == 'returned' ? verta($order->created_at) : null;
-                $a['returned_purchase_date'] = $order_status == 'returned' ? '["' . verta($order->created_at) . '"]' : '[]';
-                $a['returned_purchase_day'] = $order_status == 'returned' ? '[0]' : '[]';
-                $a['returned_purchase_total_day'] = 0;
-                $a['returned_purchase_sequence_day'] = '[]';
-                $a['returned_purchase_avg_sequence_day'] = 0;
-                $a['returned_purchase_pressture_day'] = $order_status == 'returned' ? 'first' : null;
-                $a['returned_purchase_power_in_month'] = $order_status == 'returned' ? $all_purchase_power_in_month : null;
-                $a['returned_purchase_power_in_year'] = $order_status == 'returned' ? $all_purchase_power_in_year : null;
-
-                $a['canceled_order_times'] = $order_status == 'canceled' ? 1 : 0;
-                $a['canceled_order_discount_times'] = $order_status == 'canceled' ? $order_discount_times : 0;
-                $a['canceled_order_free_delivery_times'] = $order_status == 'canceled' ? $all_order_free_delivery_times : 0;
-                $a['canceled_product_count'] = $order_status == 'canceled' ? $count_selected : 0;
-                $a['canceled_product_discount_count'] = $order_status == 'canceled' ? $order_discount_times * $count_selected : 0;
-                $a['canceled_product_free_delivery_count'] = $order_status == 'canceled' ? $all_order_free_delivery_times * $count_selected : 0;
-                $a['canceled_total_product_pay_price'] = $order_status == 'canceled' ? round($sale_price * $count_selected) : 0;
-                $a['canceled_total_product_discount'] = $order_status == 'canceled' ? round($order_discount_times * $discount_price * $count_selected) : 0;
-                $a['canceled_avg_product_pay_price'] = $order_status == 'canceled' ? round($a['canceled_total_product_pay_price'] / $a['canceled_product_count']) : 0;
-                $a['canceled_avg_product_discount'] = $order_status == 'canceled' ? $order_discount_times > 0 ? round($a['canceled_total_product_discount'] / $a['canceled_product_discount_count']) : 0 : 0;
-                $a['canceled_total_order_delivery'] = $order_status == 'canceled' ? round($delivery_price) : 0;
-                $a['canceled_total_product_delivery'] = $order_status == 'canceled' ? round($delivery_price / $all_count_products) : 0;
-                $a['canceled_avg_product_delivery'] = $order_status == 'canceled' ? ($a['canceled_product_count'] - $a['canceled_product_free_delivery_count']) > 0 ? round($a['canceled_total_product_delivery'] / ($a['canceled_product_count'] - $a['canceled_product_free_delivery_count'])) : 0 : 0;
-                $a['canceled_order_first_date'] = $order_status == 'canceled' ? verta($order->created_at) : null;
-                $a['canceled_order_last_date'] = $order_status == 'canceled' ? verta($order->created_at) : null;
-                $a['canceled_purchase_date'] = $order_status == 'canceled' ? '["' . verta($order->created_at) . '"]' : '[]';
-                $a['canceled_purchase_day'] = $order_status == 'canceled' ? '[0]' : '[]';
-                $a['canceled_purchase_total_day'] = 0;
-                $a['canceled_purchase_sequence_day'] = '[]';
-                $a['canceled_purchase_avg_sequence_day'] = 0;
-                $a['canceled_purchase_pressture_day'] = $order_status == 'canceled' ? 'first' : null;
-                $a['canceled_purchase_power_in_month'] = $order_status == 'canceled' ? $all_purchase_power_in_month : null;
-                $a['canceled_purchase_power_in_year'] = $order_status == 'canceled' ? $all_purchase_power_in_year : null;
-
-                HistoryCustomerOrderProduct::create($a);
-            }
-        }
+        $order = Order::find($order_id);
+        // dd($customer_id , $product_id , $order->order_status_id,$order);
+        HistoryCustomerOrderProductController::set_data_history_customer_order_product($customer_id, $product_id, $order);
         $hc_status['hc_order_product_status'] = 1;
-        Order::where('id', $order->id)->update($hc_status);
+        Order::where('id', $order_id)->update($hc_status);
     }
 
     public function listOrders()
@@ -1163,20 +723,63 @@ class OrderController extends Controller
     public function changeStatus(Request $request)
     {
         $input = $request->all();
-
+        $result = 0;
         $id = $input['id'];
+        $order_status_id = $input['order_status_id'];
+        $customer_id = $input['customer_id'];
+        $device_info = $input['device_info'];
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
-        $Order = Order::where('id', $id)->first();
-
-        if (Order::where('id', $id)->exists()) {
-            $Order = $Order->update([
-                'status' => $input['status'],
-            ]);
+        if (!OrderStatus::find($order_status_id)->exists()) {
+            return $result;
         }
 
-        return $Order;
+        if (Order::where('id', $id)->where('customer_id', $customer_id)->exists()) {
+            $order = Order::where('id', $id)->where('customer_id', $customer_id)->first();
+            $order_status_id_old = $order->order_status_id;
+            if ($order_status_id_old == $order_status_id) {
+                return $result;
+            }
+            // dd($result);
+            try {
+                $result = $order->update([
+                    'order_status_id' => $order_status_id,
+                ]);
+            } catch (\Throwable $th) {
+                dd($th);
+            }
+
+            if ($result) {
+                try {
+                    $hcDevice_id = HistoryCustomerController::setAndGetDeviceInfoId($input['device_info'], $input['customer_id']);
+
+                    $hcOrder = array();
+                    $hcOrder['device_history_id'] = $hcDevice_id;
+                    $hcOrder['customer_id'] = $input['customer_id'];
+                    $hcOrder['order_id'] = $order->id;
+                    $hcOrder['order_status_id'] = $order_status_id; // default 1 means pay_paying
+                    $hcOrder['execute_time'] = Carbon::now()->toDateTimeString();
+
+                    // return $hcOrder;
+
+                    HistoryCustomerOrder::create($hcOrder);
+                } catch (\Throwable $th) {}
+
+                try {
+                    $order = Order::where('customer_id', $customer_id)->get();
+                    // echo 'customer_id '. $customer_id .' order ' .($order) ."\n";
+                    HistoryCustomerOrderProduct::where('customer_id', $customer_id)->forcedelete();
+                    for ($j = 0; $j < count($order); $j++) {
+                        $product_id = json_decode($order[$j]->product_id);
+                        HistoryCustomerOrderProductController::set_data_history_customer_order_product($customer_id, $product_id, $order[$j]);
+                    }
+
+                } catch (\Throwable $th) {}
+            }
+        }
+
+        return $result;
     }
 
 }

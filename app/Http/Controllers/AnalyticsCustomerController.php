@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers;
 
-
-use App\Models\Category;
-use App\Models\Order;
 use App\Helpers\Helper;
 use App\Models\Customer;
+use App\Models\HistoryCustomerCart;
+use App\Models\HistoryCustomerCategory;
+use App\Models\HistoryCustomerLike;
+use App\Models\HistoryCustomerNextCart;
+use App\Models\HistoryCustomerOrderProduct;
+use App\Models\HistoryCustomerShare;
+use App\Models\HistoryCustomerView;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use App\Models\HistoryCustomerCart;
-use App\Models\HistoryCustomerLike;
-use App\Models\HistoryCustomerView;
-use App\Models\HistoryCustomerOrder;
-use App\Models\HistoryCustomerShare;
-use App\Models\HistoryCustomerCategory;
-use App\Models\HistoryCustomerNextCart;
 
 class AnalyticsCustomerController extends Controller
 {
@@ -41,19 +38,16 @@ class AnalyticsCustomerController extends Controller
             $data['customer_id'] = $customers[$i]->id;
 
             // customerIdProductId === CPid
-            $OrderCPid = Order::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
-            // $hcOrderCPid = HistoryCustomerOrder::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
+            // $OrderCPid = Order::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
+            $hcOrderProductCPid = HistoryCustomerOrderProduct::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
             $hcCartCPid = HistoryCustomerCart::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
             $hcNextCartCPid = HistoryCustomerNextCart::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
             $hcLikeCPid = HistoryCustomerLike::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
             $hcViewCPid = HistoryCustomerView::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
             $hcShareCPid = HistoryCustomerShare::Select('product_id')->distinct()->where('customer_id', $data['customer_id'])->get();
 
-            for ($k = 0; $k < count($OrderCPid); $k++) {
-                $order_data = json_decode($OrderCPid[$k]->product_id);
-                for ($h = 0; $h < count($order_data); $h++) {
-                    array_push($productId, $order_data[$h]);
-                }
+            for ($k = 0; $k < count($hcOrderProductCPid); $k++) {
+                array_push($productId, $hcOrderProductCPid[$k]->product_id);
             }
 
             for ($k = 0; $k < count($hcCartCPid); $k++) {
@@ -78,7 +72,6 @@ class AnalyticsCustomerController extends Controller
             // dd($productId );
             // echo json_encode($productId) ."\n";
 
-
             $productId = array_unique($productId);
             sort($productId);
             // echo json_encode($productId) ."\n";
@@ -91,12 +84,23 @@ class AnalyticsCustomerController extends Controller
                 // echo $productId[$j]  ." customer_id " .$data['customer_id'] ." j $j \n";
                 $viewData = array();
                 $viewData['product_id'] = $productId[$j];
+                $viewData['hc_view_id'] = array();
+                $viewData['hc_category_id'] = array();
+                $viewData['hc_order_product_id'] = 0;
+                $viewData['hc_like_id'] = 0;
+                $viewData['hc_share_id'] = array();
+                $viewData['hc_cart_id'] = array();
+                $viewData['hc_next_cart_id'] = array();
+                $viewData['product_count_view'] = 0;
+                $viewData['product_avg_time_view'] = 0;
                 $CPid = HistoryCustomerView::where('customer_id', $data['customer_id'])->where('product_id', $viewData['product_id'])->get();
                 if ($CPid != null && count($CPid) > 0) {
+                    for ($h = 0; $h < count($CPid); $h++) {
+                        array_push($viewData['hc_view_id'], $CPid[$h]->id);
+                    }
                     $viewData['product_count_view'] = count($CPid);
-                    $viewData['product_avg_time_view'] = $CPid->avg('page_view_time');
+                    $viewData['product_avg_time_view'] = round($CPid->avg('page_view_time'));
                 }
-
 
                 // dd($productId[$j]);
                 $viewData['category_id'] = array();
@@ -110,58 +114,99 @@ class AnalyticsCustomerController extends Controller
                     for ($m = 0; $m < count($categoryId); $m++) {
                         $CPid = HistoryCustomerCategory::where('customer_id', $data['customer_id'])->where('category_id', $categoryId[$m])->get();
                         if ($CPid != null) {
+                            for ($h = 0; $h < count($CPid); $h++) {
+                                array_push($viewData['hc_category_id'], $CPid[$h]->id);
+                            }
                             array_push($viewData['category_id'], $categoryId[$m]);
                             array_push($viewData['category_count_view'], count($CPid));
-                            array_push($viewData['category_avg_time_view'], $CPid->avg('page_view_time'));
+                            array_push($viewData['category_avg_time_view'], round($CPid->avg('page_view_time')));
                         }
                     }
                 }
 
                 $CPid = HistoryCustomerLike::where('customer_id', $data['customer_id'])->where('product_id', $productId[$j])->get()->last();
+                $viewData['hc_like_id'] = $CPid != null ? $CPid->id : 0;
                 $viewData['product_like'] = $CPid != null ? $CPid->like : 0;
 
                 $CPid = HistoryCustomerShare::where('customer_id', $data['customer_id'])->where('product_id', $productId[$j])->get();
+                if ($CPid != null && count($CPid) > 0) {
+                    for ($h = 0; $h < count($CPid); $h++) {
+                        array_push($viewData['hc_share_id'], $CPid[$h]->id);
+                    }
+                }
                 $viewData['product_share_count'] = $CPid != null ? count($CPid) : 0;
 
                 $CPid = HistoryCustomerCart::where('customer_id', $data['customer_id'])->where('product_id', $productId[$j])->get();
-                $viewData['product_cart_count'] = $CPid != null ? count($CPid) : 0;
+                if ($CPid != null && count($CPid) > 0) {
+                    for ($h = 0; $h < count($CPid); $h++) {
+                        array_push($viewData['hc_cart_id'], $CPid[$h]->id);
+                    }
+                }
+                $viewData['product_cart_times'] = $CPid != null ? count($CPid) : 0;
                 $viewData['product_cart_increment_decrement'] = $CPid != null ? $CPid->sum('increment_decrement') : 0;
 
                 $CPid = HistoryCustomerNextCart::where('customer_id', $data['customer_id'])->where('product_id', $productId[$j])->get();
-                $viewData['product_next_cart_count'] = $CPid != null ? count($CPid) : 0;
+                if ($CPid != null && count($CPid) > 0) {
+                    for ($h = 0; $h < count($CPid); $h++) {
+                        array_push($viewData['hc_next_cart_id'], $CPid[$h]->id);
+                    }
+                }
+                $viewData['product_next_cart_times'] = $CPid != null ? count($CPid) : 0;
                 $viewData['product_next_cart_increment_decrement'] = $CPid != null ? $CPid->sum('increment_decrement') : 0;
 
-                $CPid = Order::where('customer_id', $data['customer_id'])->get();
+                $CPid = HistoryCustomerOrderProduct::where('customer_id', $data['customer_id'])->where('product_id', $productId[$j])->first();
 
-                $viewData['product_order_count'] = 0;
-                $viewData['product_order_times'] = 0;
-                // dd($CPid);
-                // if ($CPid != null && count($CPid) > 0) {
-                //     for ($n = 0; $n < count($CPid); $n++) {
-                //         $PId = json_decode($CPid[$n]->product_id);
-                //         $key = array_search($productId[$j], $PId);
-                //         if ($data['customer_id'] == 2) {
-                //             echo '$productId[$j] '. $productId[$j] .' key '. $key . "\n";
-                //         }
-                        
-                    
-                //         if ($key != false) {
-                //             $viewData['product_order_times']++;
-                //             $count_selectd = json_decode($CPid[$n]->count_selectd);
-                //             if ($count_selectd != null) {
-                //                 $viewData['product_order_count'] += $count_selectd[$key];
-                //             }
-                //         }
-                //     }
-                // }
-                $viewData['product_next_cart_count'] = $CPid != null ? count($CPid) : 0;
-                $viewData['product_next_cart_increment_decrement'] = $CPid != null ? $CPid->sum('increment_decrement') : 0;
+                // echo $CPid . "\n";
+                // dd($data ['customer_id'], $productId[$j], count($CPid));
+
+                $viewData['product_all_order_times'] = 0;
+                $viewData['product_all_order_product_discount_times'] = 0;
+                $viewData['product_all_order_product_free_delivery_times'] = 0;
+                $viewData['product_all_order_product_count'] = 0;
+                $viewData['product_all_order_product_discount_count'] = 0;
+                $viewData['product_all_order_product_free_delivery_count'] = 0;
+                $viewData['product_delivered_order_times'] = 0;
+                $viewData['product_delivered_order_product_discount_times'] = 0;
+                $viewData['product_delivered_order_product_free_delivery_times'] = 0;
+                $viewData['product_delivered_order_product_count'] = 0;
+                $viewData['product_delivered_order_product_discount_count'] = 0;
+                $viewData['product_delivered_order_product_free_delivery_count'] = 0;
+                $viewData['product_pending_order_times'] = 0;
+                $viewData['product_pending_order_product_discount_times'] = 0;
+                $viewData['product_pending_order_product_free_delivery_times'] = 0;
+                $viewData['product_pending_order_product_count'] = 0;
+                $viewData['product_pending_order_product_discount_count'] = 0;
+                $viewData['product_pending_order_product_free_delivery_count'] = 0;
+                if ($CPid != null) {
+                    // dd($data ['customer_id'], $productId[$j],$CPid->all_order_times);
+                    $viewData['hc_order_product_id'] = $CPid->id;
+                    $viewData['product_all_order_times'] = $CPid->all_order_times;
+                    $viewData['product_all_order_product_discount_times'] = $CPid->all_order_discount_times;
+                    $viewData['product_all_order_product_free_delivery_times'] = $CPid->all_order_free_delivery_times;
+                    $viewData['product_all_order_product_count'] = $CPid->all_product_count;
+                    $viewData['product_all_order_product_discount_count'] = $CPid->all_product_discount_count;
+                    $viewData['product_all_order_product_free_delivery_count'] = $CPid->all_product_free_delivery_count;
+                    $viewData['product_delivered_order_times'] = $CPid->delivered_order_times;
+                    $viewData['product_delivered_order_product_discount_times'] = $CPid->delivered_order_discount_times;
+                    $viewData['product_delivered_order_product_free_delivery_times'] = $CPid->delivered_order_free_delivery_times;
+                    $viewData['product_delivered_order_product_count'] = $CPid->delivered_product_count;
+                    $viewData['product_delivered_order_product_discount_count'] = $CPid->delivered_product_discount_count;
+                    $viewData['product_delivered_order_product_free_delivery_count'] = $CPid->delivered_product_free_delivery_count;
+                    $viewData['product_pending_order_times'] = $CPid->pending_order_times;
+                    $viewData['product_pending_order_product_discount_times'] = $CPid->pending_order_discount_times;
+                    $viewData['product_pending_order_product_free_delivery_times'] = $CPid->pending_order_free_delivery_times;
+                    $viewData['product_pending_order_product_count'] = $CPid->pending_product_count;
+                    $viewData['product_pending_order_product_discount_count'] = $CPid->pending_product_discount_count;
+                    $viewData['product_pending_order_product_free_delivery_count'] = $CPid->pending_product_free_delivery_count;
+                }
+
+                // $viewData['product_next_cart_count'] = $CPid != null ? count($CPid) : 0;
+                // $viewData['product_next_cart_increment_decrement'] = $CPid != null ? $CPid->sum('increment_decrement') : 0;
 
                 array_push($data, $viewData);
                 // echo $data ."\n";
                 // dd($data);
             }
-
 
             // for ($j = 0; $j < count($hcViewCPid); $j++) {
             //     $viewData = array();
@@ -184,11 +229,9 @@ class AnalyticsCustomerController extends Controller
             //     // echo 'customer_id => ' . $customerId .'   product_id => ' . $productId .'    product_avg_time_view => ' .$product_avg_time_view . '     product_count_view => ' . $product_count_view . '     hc_view_ids => ' . $hc_view_ids . "\n";
             // }
 
-
             // $hcCuatomerCPid = HistoryCustomerCategory::Select('category_id')->distinct()->where('customer_id', $data['customer_id'])->get();
 
             // // dd($data['customer_id'],$hcCuatomerCPid);
-
 
             // for ($j = 0; $j < count($hcCuatomerCPid); $j++) {
             //     $viewData = array();
@@ -210,11 +253,6 @@ class AnalyticsCustomerController extends Controller
             //     // dd($ids);
             //     // echo 'customer_id => ' . $customerId .'   product_id => ' . $productId .'    product_avg_time_view => ' .$product_avg_time_view . '     product_count_view => ' . $product_count_view . '     hc_view_ids => ' . $hc_view_ids . "\n";
             // }
-
-
-
-
-
 
             // $hcViewCustomerId = HistoryCustomerView::where('customer_id' , $hcView[$i]->customer_id)->delete();
 
