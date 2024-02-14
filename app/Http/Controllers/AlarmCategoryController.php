@@ -6,7 +6,7 @@ use App\Helpers\Helper;
 use App\Models\Alarm;
 use Illuminate\Http\Request;
 
-class AlarmController extends Controller
+class AlarmCategoryController extends Controller
 {
     public function listAlarmWithStatus(Request $request)
     {

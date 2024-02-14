@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('alarms', function (Blueprint $table) {
+        Schema::create('alarm_categories', function (Blueprint $table) {
             $table->id();
             $table->text('name');
             $table->text('name_fa');
@@ -21,9 +21,10 @@ return new class extends Migration
             $table->integer('product_count')->default(1);
             $table->integer('category_count')->default(1);
             $table->text('discount_tag')->nullable();
-            $table->boolean('send_sms')->default(0);
             $table->text('send_time')->nullable();
-            $table->text('send_date')->nullable();
+            $table->boolean('send_sms')->default(1);
+            $table->boolean('send_notification')->default(1);
+            $table->boolean('send_email')->default(1);
             $table->text('icon')->nullable();
             $table->text('image')->nullable();
             $table->text('description')->nullable();
@@ -37,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('alarms');
+        Schema::dropIfExists('alarm_categories');
     }
 };

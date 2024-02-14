@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
-use App\Http\Controllers\AlarmController;
+use App\Http\Controllers\AlarmCategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SliderController;
@@ -111,7 +111,7 @@ Route::post('set_priority_address', [AddressController::class, 'setPriorityAddre
 Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->name('confirmAddress');
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
 
-Route::post('list_alarm_with_status', [AlarmController::class, 'listAlarmWithStatus'])->name('listAlarmWithStatus');
+Route::post('list_alarm_with_status', [AlarmCategoryController::class, 'listAlarmWithStatus'])->name('listAlarmWithStatus');
 
 Route::post('customer_perfermance_computing_oprations', [AnalyticsCustomerController::class, 'customerPerfermanceComputingOprations'])->name('customerPerfermanceComputingOprations');
 

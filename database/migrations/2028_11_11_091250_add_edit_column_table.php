@@ -1,19 +1,36 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
 
+        // if (Schema::hasTable('alarms')) {
 
+        //     Schema::rename('alarms', 'alarm_categories');
+        // }
 
+        // if (Schema::hasTable('alarm_categories')) {
+        //     Schema::table('alarm_categories', function (Blueprint $table) {
+        //         if (!Schema::hasColumn('alarm_categories', 'send_notification')) {
+        //             $table->boolean('send_notification')->default(1)->after('send_sms');
+        //         }
+        //         if (!Schema::hasColumn('alarm_categories', 'send_email')) {
+        //             $table->boolean('send_email')->default(1)->after('send_notification');
+        //         }
+        //         if (!Schema::hasColumn('alarm_categories', 'send_date')) {
+        //             $table->dropColumn('send_date');
+        //         }
+
+        //     });
+        // }
 
         // if (Schema::hasTable('orders')) {
         //     Schema::table('orders', function (Blueprint $table) {
@@ -39,7 +56,7 @@ return new class extends Migration {
         // }
 
         //     DB::table('history_customer_carts')->update([
-        //         'increment_decrement' => DB::raw('count')   
+        //         'increment_decrement' => DB::raw('count')
         //     ]);
 
         //     //Remove the old column:
@@ -67,8 +84,6 @@ return new class extends Migration {
         //     });
         // }
         // Schema::enableForeignKeyConstraints();
-
-
 
         // if (Schema::hasTable('messages')) {
         //     Schema::table('messages', function (Blueprint $table) {
@@ -105,22 +120,13 @@ return new class extends Migration {
     public function down(): void
     {
 
+        // Schema::rename('alarms', 'alarm_categories');
+
         // Schema::disableForeignKeyConstraints();
         // Schema::dropIfExists('history_customer_devices');
         // Schema::enableForeignKeyConstraints();
     }
 };
-
-
-
-
-
-
-
-
-
-
-
 
 // try {
 //             Schema::table('history_customer_carts', function (Blueprint $table) {
@@ -146,8 +152,6 @@ return new class extends Migration {
 //     });
 // }
 
-
-
 // if (Schema::hasTable('history_customer_carts')) {
 //     Schema::table('history_customer_carts', function (Blueprint $table) {
 //         $table->text('status')->nullable()->after('execute_time');
@@ -161,7 +165,6 @@ return new class extends Migration {
 //         $table->text('message')->nullable()->after('status');
 //     });
 // }
-
 
 // if (Schema::hasTable('history_customer_devices')) {
 //     Schema::table('history_customer_devices', function (Blueprint $table) {

@@ -164,7 +164,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->pending_purchase_date != null ? $pending_purchase_sequence_day = json_decode($orderProduct->pending_purchase_sequence_day) : null;
                     array_push($pending_purchase_sequence_day, abs($diffDays));
 
-                    $pending_purchase_sequence_day = array_filter($pending_purchase_sequence_day);
+                    // $pending_purchase_sequence_day = array_filter($pending_purchase_sequence_day);
                     $pending_purchase_avg_sequence_day = count($pending_purchase_sequence_day) == 0 ? 0 : array_sum($pending_purchase_sequence_day) / count($pending_purchase_sequence_day);
 
                     $pending_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($pending_purchase_sequence_day);
@@ -216,7 +216,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->canceled_purchase_date != null ? $canceled_purchase_sequence_day = json_decode($orderProduct->canceled_purchase_sequence_day) : null;
                     array_push($canceled_purchase_sequence_day, abs($diffDays));
 
-                    $canceled_purchase_sequence_day = array_filter($canceled_purchase_sequence_day);
+                    // $canceled_purchase_sequence_day = array_filter($canceled_purchase_sequence_day);
                     $canceled_purchase_avg_sequence_day = count($canceled_purchase_sequence_day) == 0 ? 0 : array_sum($canceled_purchase_sequence_day) / count($canceled_purchase_sequence_day);
 
                     $canceled_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($canceled_purchase_sequence_day);
@@ -267,7 +267,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->returned_purchase_date != null ? $returned_purchase_sequence_day = json_decode($orderProduct->returned_purchase_sequence_day) : null;
                     array_push($returned_purchase_sequence_day, abs($diffDays));
 
-                    $returned_purchase_sequence_day = array_filter($returned_purchase_sequence_day);
+                    // $returned_purchase_sequence_day = array_filter($returned_purchase_sequence_day);
                     $returned_purchase_avg_sequence_day = count($returned_purchase_sequence_day) == 0 ? 0 : array_sum($returned_purchase_sequence_day) / count($returned_purchase_sequence_day);
 
                     $returned_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($returned_purchase_sequence_day);
@@ -318,7 +318,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->delivered_purchase_date != null ? $delivered_purchase_sequence_day = json_decode($orderProduct->delivered_purchase_sequence_day) : null;
                     array_push($delivered_purchase_sequence_day, abs($diffDays));
 
-                    $delivered_purchase_sequence_day = array_filter($delivered_purchase_sequence_day);
+                    // $delivered_purchase_sequence_day = array_filter($delivered_purchase_sequence_day);
                     $delivered_purchase_avg_sequence_day = count($delivered_purchase_sequence_day) == 0 ? 0 : array_sum($delivered_purchase_sequence_day) / count($delivered_purchase_sequence_day);
 
                     $delivered_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($delivered_purchase_sequence_day);
@@ -710,7 +710,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->pending_purchase_date != null ? $pending_purchase_sequence_day = json_decode($orderProduct->pending_purchase_sequence_day) : null;
                     array_push($pending_purchase_sequence_day, abs($diffDays));
 
-                    $pending_purchase_sequence_day = array_filter($pending_purchase_sequence_day);
+                    // $pending_purchase_sequence_day = array_filter($pending_purchase_sequence_day);
                     $pending_purchase_avg_sequence_day = count($pending_purchase_sequence_day) == 0 ? 0 : array_sum($pending_purchase_sequence_day) / count($pending_purchase_sequence_day);
 
                     $pending_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($pending_purchase_sequence_day);
@@ -762,7 +762,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->canceled_purchase_date != null ? $canceled_purchase_sequence_day = json_decode($orderProduct->canceled_purchase_sequence_day) : null;
                     array_push($canceled_purchase_sequence_day, abs($diffDays));
 
-                    $canceled_purchase_sequence_day = array_filter($canceled_purchase_sequence_day);
+                    // $canceled_purchase_sequence_day = array_filter($canceled_purchase_sequence_day);
                     $canceled_purchase_avg_sequence_day = count($canceled_purchase_sequence_day) == 0 ? 0 : array_sum($canceled_purchase_sequence_day) / count($canceled_purchase_sequence_day);
 
                     $canceled_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($canceled_purchase_sequence_day);
@@ -813,7 +813,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->returned_purchase_date != null ? $returned_purchase_sequence_day = json_decode($orderProduct->returned_purchase_sequence_day) : null;
                     array_push($returned_purchase_sequence_day, abs($diffDays));
 
-                    $returned_purchase_sequence_day = array_filter($returned_purchase_sequence_day);
+                    // $returned_purchase_sequence_day = array_filter($returned_purchase_sequence_day);
                     $returned_purchase_avg_sequence_day = count($returned_purchase_sequence_day) == 0 ? 0 : array_sum($returned_purchase_sequence_day) / count($returned_purchase_sequence_day);
 
                     $returned_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($returned_purchase_sequence_day);
@@ -864,7 +864,7 @@ class HistoryCustomerOrderProductController extends Controller
                     $orderProduct->delivered_purchase_date != null ? $delivered_purchase_sequence_day = json_decode($orderProduct->delivered_purchase_sequence_day) : null;
                     array_push($delivered_purchase_sequence_day, abs($diffDays));
 
-                    $delivered_purchase_sequence_day = array_filter($delivered_purchase_sequence_day);
+                    // $delivered_purchase_sequence_day = array_filter($delivered_purchase_sequence_day);
                     $delivered_purchase_avg_sequence_day = count($delivered_purchase_sequence_day) == 0 ? 0 : array_sum($delivered_purchase_sequence_day) / count($delivered_purchase_sequence_day);
 
                     $delivered_purchase_pressture_day = HistoryCustomerOrderProductController::get_pressture_day($delivered_purchase_sequence_day);
