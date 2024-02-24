@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Alarm extends Model
+class AlarmCategory extends Model
 {
     use HasFactory , SoftDeletes;
 

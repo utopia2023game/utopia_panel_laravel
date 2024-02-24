@@ -30,11 +30,21 @@ class OriginalFinancialRankController extends Controller
         $data['product_price_mid_high_price'] = intval(round($min_sale_price + ($diff * 2) / 3));
         $data['product_price_high_price'] = intval(round($max_sale_price));
 
-        $hc_order_products = HistoryCustomerOrderProduct::get();
+        $customer_id_array = HistoryCustomerOrderProduct::Select('customer_id')->distinct()->get()->toArray();
+        $customer_avg_purchase_price_array = array();
+        $customer_avg_total_purchase_price_array = array();
+        
+        for ($i=0; $i < count($customer_id_array); $i++) { 
+            $hc_order_products = HistoryCustomerOrderProduct::where('customer_id' , $customer_id_array[$i])->get();
+            array_push($customer_avg_purchase_price_array , $hc_order_products->avg('all_avg_product_pay_price'));
+            array_push($customer_avg_total_purchase_price_array , $hc_order_products->avg('all_total_product_pay_price'));
+        }
+        
 
+        // dd($customer_avg_purchase_price_array , $customer_avg_total_purchase_price_array);
 
-        $min_purchase_price = $hc_order_products->min('all_avg_product_pay_price');
-        $max_purchase_price = $hc_order_products->max('all_avg_product_pay_price');
+        $min_purchase_price = min($customer_avg_purchase_price_array);
+        $max_purchase_price = max($customer_avg_purchase_price_array);
 
         $diff = $max_purchase_price - $min_purchase_price;
 
@@ -43,9 +53,8 @@ class OriginalFinancialRankController extends Controller
         $data['avg_purchase_mid_high_price'] = intval(round($min_purchase_price + ($diff * 2) / 3));
         $data['avg_purchase_high_price'] = intval(round($max_purchase_price));
 
-
-        $min_total_purchase_price = $hc_order_products->min('all_total_product_pay_price');
-        $max_total_purchase_price = $hc_order_products->max('all_total_product_pay_price');
+        $min_total_purchase_price = min($customer_avg_total_purchase_price_array);
+        $max_total_purchase_price = max($customer_avg_total_purchase_price_array);
 
         $diff_total = $max_total_purchase_price - $min_total_purchase_price;
 

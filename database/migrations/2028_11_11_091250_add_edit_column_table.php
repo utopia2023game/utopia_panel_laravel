@@ -12,25 +12,27 @@ return new class extends Migration
     public function up(): void
     {
 
-        // if (Schema::hasTable('alarms')) {
-
-        //     Schema::rename('alarms', 'alarm_categories');
+        // Schema::disableForeignKeyConstraints();
+        // if (Schema::hasTable('alarm_smart_customers')) {
+        //     Schema::rename('alarm_smart_customers', 'alarm_smart_offer_customers');
         // }
 
-        // if (Schema::hasTable('alarm_categories')) {
-        //     Schema::table('alarm_categories', function (Blueprint $table) {
-        //         if (!Schema::hasColumn('alarm_categories', 'send_notification')) {
-        //             $table->boolean('send_notification')->default(1)->after('send_sms');
-        //         }
-        //         if (!Schema::hasColumn('alarm_categories', 'send_email')) {
-        //             $table->boolean('send_email')->default(1)->after('send_notification');
-        //         }
-        //         if (!Schema::hasColumn('alarm_categories', 'send_date')) {
-        //             $table->dropColumn('send_date');
-        //         }
+        // if (Schema::hasTable('alarm_smart_offer_customers')) {
+        //     Schema::table('alarm_smart_offer_customers', function (Blueprint $table) {
+
+        //         $table->boolean('setting_edit')->default(0)->after('category_id_tree');
+        //         $table->text('setting_send_date')->nullable()->after('setting_edit');
+        //         $table->text('setting_send_time')->nullable()->after('setting_send_date');
+        //         $table->text('setting_discount')->nullable()->after('setting_send_time');
+        //         $table->integer('setting_product_count')->default(1)->after('setting_discount');
+        //         $table->integer('setting_category_count')->default(1)->after('setting_product_count');
+        //         $table->boolean('setting_sms')->default(1)->after('setting_category_count');
+        //         $table->boolean('setting_notification')->default(1)->after('setting_sms');
+        //         $table->boolean('setting_email')->default(1)->after('setting_notification');
 
         //     });
         // }
+        // Schema::enableForeignKeyConstraints();
 
         // if (Schema::hasTable('orders')) {
         //     Schema::table('orders', function (Blueprint $table) {
@@ -119,10 +121,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-
-        // Schema::rename('alarms', 'alarm_categories');
+        // Schema::table('alarm_smart_executes', function (Blueprint $table) {
+        //     $table->integer('setting_product_count')->default(1)->change();
+        //     $table->integer('setting_category_count')->default(1)->change();
+        // });
 
         // Schema::disableForeignKeyConstraints();
+        // Schema::rename('alarms', 'alarm_categories');
+
         // Schema::dropIfExists('history_customer_devices');
         // Schema::enableForeignKeyConstraints();
     }

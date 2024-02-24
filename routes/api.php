@@ -9,6 +9,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AlarmSmartExecuteController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProductController;
@@ -113,7 +114,10 @@ Route::post('set_priority_address', [AddressController::class, 'setPriorityAddre
 Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->name('confirmAddress');
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
 
-Route::post('list_alarm_with_status', [AlarmCategoryController::class, 'listAlarmWithStatus'])->name('listAlarmWithStatus');
+Route::post('set_birth_execute_list', [AlarmSmartExecuteController::class, 'setBirthExecuteList'])->name('setBirthExecuteList');
+Route::post('get_execute_list_alarm_by_status', [AlarmSmartExecuteController::class, 'getExecuteListAlarmByStatus'])->name('getExecuteListAlarmByStatus');
+
+Route::post('list_alarm_category', [AlarmCategoryController::class, 'listAlarmCategory'])->name('listAlarmCategory');
 
 Route::post('set_original_financial_rank', [OriginalFinancialRankController::class, 'setOriginalFinancialRank'])->name('setOriginalFinancialRank');
 Route::post('set_customer_financial_rank', [CustomerFinancialRankController::class, 'setCustomerFinancialRank'])->name('setCustomerFinancialRank');
