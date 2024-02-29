@@ -26,8 +26,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sms_customer_logons', function (Blueprint $table) {
-            Schema::dropIfExists('sms_customer_logons');
-        });
+        // Schema::table('sms_customer_logons', function (Blueprint $table) {
+            // Schema::dropIfExists('sms_customer_logons');
+        // });
     }
 };

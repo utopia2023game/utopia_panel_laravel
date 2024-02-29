@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('alarm_categories', function (Blueprint $table) {
+        Schema::create('alarm_smart_categories', function (Blueprint $table) {
             $table->id();
             $table->text('name');
             $table->text('name_fa');
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('alarm_categories');
+        // Schema::dropIfExists('alarm_smart_categories');
     }
 };

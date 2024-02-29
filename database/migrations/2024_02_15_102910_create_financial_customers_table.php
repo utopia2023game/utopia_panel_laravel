@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('original_financial_ranks', function (Blueprint $table) {
+        Schema::create('financial_customers', function (Blueprint $table) {
             $table->id();
             $table->integer('product_price_low_price')->default(0);
             $table->integer('product_price_mid_low_price')->default(0);
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('original_financial_ranks');
+        Schema::dropIfExists('financial_customers');
     }
 };

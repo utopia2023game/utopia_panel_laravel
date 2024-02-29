@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
-use App\Models\AlarmCategory;
+use App\Models\AlarmSmartCategory;
 use App\Models\AlarmSmartExecute;
+use App\Models\AlarmSmartOfferCategory;
 use App\Models\AlarmSmartOfferCustomer;
+use App\Models\AlarmSmartOfferProduct;
 use App\Models\AlarmStatus;
 use App\Models\AnalyticsCustomer;
+use App\Models\Category;
 use App\Models\Customer;
 use App\Models\HistoryCustomerOrderProduct;
+use App\Models\Product;
 use Hekmatinasser\Verta\Verta;
 use Illuminate\Http\Request;
 
@@ -21,8 +25,8 @@ class AlarmSmartExecuteController extends Controller
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
-        $alarm_category = AlarmCategory::where('name', 'birthday')->first();
-        $delay_day_execute = $alarm_category->delay_day_execute;
+        $alarm_smart_category = AlarmSmartCategory::where('name', 'birthday')->first();
+        $delay_day_execute = $alarm_smart_category->delay_day_execute;
 
         $e = AlarmSmartOfferCustomer::select('customer_id')->distinct()->where('alarm_smart_execute_id', 1)->where('alarm_status_id', 1)->get()->toArray();
 
@@ -52,7 +56,7 @@ class AlarmSmartExecuteController extends Controller
                 $customer = Customer::where('id', $customerId)->first();
                 // $i==1 ? dd($customerId ,$customer) : null;
                 $dataOffer = array();
-                $AlarmSmartExecuteId = 0;
+                // $AlarmSmartExecuteId = 0;
 
                 $now = str_replace('-0', '-', strval(substr($DateNow, 0, 10)));
                 $a = '[' . str_replace('-', ',', $now) . ']';
@@ -69,7 +73,7 @@ class AlarmSmartExecuteController extends Controller
 
                 $diffDays = verta($BirthDate)->diffDays($DateNow, false);
 
-                // $i == 3 ? dd($DateNow, $BirthDate, $diffDays, $delay_day_execute, $diffDays < 0 && abs($diffDays) <= $delay_day_execute) : null;
+                // $i == 1 ? dd($DateNow, $BirthDate, $diffDays, $delay_day_execute, $diffDays < 0 && abs($diffDays) <= $delay_day_execute) : null;
 
                 if ($diffDays < 0 && abs($diffDays) <= $delay_day_execute) {
 
@@ -86,45 +90,66 @@ class AlarmSmartExecuteController extends Controller
                         array_push($customer_array, $customer);
 
                         $data = array();
-                        $data['alarm_category_id'] = $alarm_category->id;
+                        $data['alarm_smart_category_id'] = $alarm_smart_category->id;
                         $data['alarm_status_id'] = 1;
                         $data['date'] = strval(substr($DateNow, 0, 10));
-                        // $data['date'] = strval(substr($DateNow, 0, 10)) . ' ' . $alarm_category->send_time;
-                        $data['setting_send_time'] = $alarm_category->send_time;
-                        $data['setting_discount'] = $alarm_category->discount_tag;
-                        $data['setting_product_count'] = $alarm_category->product_count;
-                        $data['setting_category_count'] = $alarm_category->category_count;
-                        $data['setting_sms'] = $alarm_category->send_sms;
-                        $data['setting_notification'] = $alarm_category->send_notification;
-                        $data['setting_email'] = $alarm_category->send_email;
+                        // $data['date'] = strval(substr($DateNow, 0, 10)) . ' ' . $alarm_smart_category->send_time;
+                        $data['setting_send_time'] = $alarm_smart_category->send_time;
+                        $data['setting_discount'] = $alarm_smart_category->discount_tag;
+                        $data['setting_product_count'] = $alarm_smart_category->product_count;
+                        $data['setting_category_count'] = $alarm_smart_category->category_count;
+                        $data['setting_sms'] = $alarm_smart_category->send_sms;
+                        $data['setting_notification'] = $alarm_smart_category->send_notification;
+                        $data['setting_email'] = $alarm_smart_category->send_email;
 
-                        // if ($AlarmSmartExecuteId == 0) {
-                        //     // $AlarmSmartExecute = AlarmSmartExecute::create($data);
-                        //     $AlarmSmartExecuteId = $AlarmSmartExecute->id;
-                        // }
+                        if ($AlarmSmartExecuteId == 0) {
+                            $AlarmSmartExecute = AlarmSmartExecute::create($data);
+                            $AlarmSmartExecuteId = $AlarmSmartExecute->id;
+                        }
 
-                        // $dataOffer['alarm_smart_execute_id'] = $AlarmSmartExecuteId;
-                        $dataOffer['alarm_smart_execute_id'] = 1;
+                        $dataOffer['alarm_smart_execute_id'] = $AlarmSmartExecuteId;
+                        // $dataOffer['alarm_smart_execute_id'] = 1;
                         $dataOffer['alarm_status_id'] = 1;
                         $dataOffer['customer_id'] = $customerId;
-                        $dataOffer['alarm_category_id'] = $alarm_category->id;
-                        $dataOffer['product_count'] = $alarm_category->product_count;
+                        $dataOffer['alarm_smart_category_id'] = $alarm_smart_category->id;
 
                         $dataOffer['setting_send_date'] = strval(substr($DateNow, 0, 10));
-                        $dataOffer['setting_send_time'] = $alarm_category->send_time;
-                        $dataOffer['setting_discount'] = $alarm_category->discount_tag;
-                        $dataOffer['setting_product_count'] = $alarm_category->product_count;
-                        $dataOffer['setting_category_count'] = $alarm_category->category_count;
-                        $dataOffer['setting_sms'] = $alarm_category->send_sms;
-                        $dataOffer['setting_notification'] = $alarm_category->send_notification;
-                        $dataOffer['setting_email'] = $alarm_category->send_email;
+                        $dataOffer['setting_send_time'] = $alarm_smart_category->send_time;
+                        $dataOffer['setting_discount'] = $alarm_smart_category->discount_tag;
+                        $dataOffer['setting_product_count'] = $alarm_smart_category->product_count;
+                        $dataOffer['setting_category_count'] = $alarm_smart_category->category_count;
+                        $dataOffer['setting_sms'] = $alarm_smart_category->send_sms;
+                        $dataOffer['setting_notification'] = $alarm_smart_category->send_notification;
+                        $dataOffer['setting_email'] = $alarm_smart_category->send_email;
 
                         $count_analytics = count($analytics_customer);
                         for ($j = 0; $j < 3; $j++) {
                             $array_name = $j == 0 ? 'one' : ($j == 1 ? 'two' : 'tree');
                             // dd($j ,$array_name ,$analytics_customer[$j]->product_id);
                             if ($count_analytics > 0) {
-                                $dataOffer['product_id_' . $array_name] = $analytics_customer[$j]->product_id;
+                                $Product = Product::where('id', $analytics_customer[$j]->product_id)->first();
+                                $ASOfferData = array();
+                                $ASOfferData['customer_id'] = $customerId;
+                                $ASOfferData['product_id'] = $analytics_customer[$j]->product_id;
+                                $ASOfferData['category_id'] = json_decode($Product->categories_id)[0];
+
+                                if ($dataOffer['setting_discount'] == 'safe') {
+                                    $ASOfferData['product_discount'] = 'safe';
+                                    $ASOfferData['product_discount_precentage'] = $Product->safe_discount_percent;
+                                } else if ($dataOffer['setting_discount'] == 'special') {
+                                    $ASOfferData['product_discount'] = 'special';
+                                    $ASOfferData['product_discount_precentage'] = $Product->special_discount_percent;
+                                } else if ($dataOffer['setting_discount'] == 'exceptional') {
+                                    $ASOfferData['product_discount'] = 'exceptional';
+                                    $ASOfferData['product_discount_precentage'] = $Product->exceptional_discount_percent;
+                                } else {
+                                    $ASOfferData['product_discount'] = 'none';
+                                    $ASOfferData['product_discount_precentage'] = 0;
+                                }
+
+                                $ASOfferData['product_discription'] = '';
+                                $AlarmSmartOfferProduct = AlarmSmartOfferProduct::Create($ASOfferData);
+                                $dataOffer['as_product_id_' . $array_name] = $AlarmSmartOfferProduct->id;
                             } else {
 
                                 $product_id_array = HistoryCustomerOrderProduct::select('product_id')->distinct()->get();
@@ -133,11 +158,11 @@ class AlarmSmartExecuteController extends Controller
 
                                     if (count($product_id_array) == 1) {
                                         if ($j == 1) {
-                                            $dataOffer['product_id_two'] = $analytics_customer[0]->product_id;
-                                            $dataOffer['product_id_tree'] = $product_id_array[0];
+                                            $dataOffer['as_product_id_two'] = $analytics_customer[0]->product_id;
+                                            $dataOffer['as_product_id_tree'] = $product_id_array[0];
                                             $count_analytics--;
                                         } else if ($j == 2) {
-                                            $dataOffer['product_id_tree'] = $product_id_array[0];
+                                            $dataOffer['as_product_id_tree'] = $product_id_array[0];
                                         }
                                         $count_analytics--;
                                     } else {
@@ -153,7 +178,7 @@ class AlarmSmartExecuteController extends Controller
                                             $product_count_max = max($sum_purchase_count_array);
                                             $key = array_keys($sum_purchase_count_array, $product_count_max)[0];
 
-                                            $dataOffer['product_id_two'] = $product_id_array[$key];
+                                            $dataOffer['as_product_id_two'] = $product_id_array[$key];
 
                                             unset($sum_purchase_count_array[$key]);
                                             unset($product_id_array[$key]);
@@ -161,32 +186,30 @@ class AlarmSmartExecuteController extends Controller
                                             $product_count_max = max($sum_purchase_count_array);
                                             $key = array_keys($sum_purchase_count_array, $product_count_max)[0];
 
-                                            $dataOffer['product_id_tree'] = $product_id_array[$key];
+                                            $dataOffer['as_product_id_tree'] = $product_id_array[$key];
                                             $count_analytics--;
                                         } else if ($j == 2) {
                                             $product_count_max = max($sum_purchase_count_array);
                                             $key = array_keys($sum_purchase_count_array, $product_count_max)[0];
 
-                                            $dataOffer['product_id_tree'] = $product_id_array[$key];
+                                            $dataOffer['as_product_id_tree'] = $product_id_array[$key];
                                         }
                                         $count_analytics--;
                                     }
 
                                 } else {
                                     if ($j == 1) {
-                                        $dataOffer['product_id_two'] = $analytics_customer[0]->product_id;
-                                        $dataOffer['product_id_tree'] = $analytics_customer[0]->product_id;
+                                        $dataOffer['as_product_id_two'] = $analytics_customer[0]->product_id;
+                                        $dataOffer['as_product_id_tree'] = $analytics_customer[0]->product_id;
                                         $count_analytics--;
                                     } else if ($j == 2) {
-                                        $dataOffer['product_id_tree'] = $analytics_customer[0]->product_id;
+                                        $dataOffer['as_product_id_tree'] = $analytics_customer[0]->product_id;
                                     }
                                     $count_analytics--;
                                 }
                             }
                             $count_analytics--;
                         }
-
-                        $dataOffer['category_count'] = $alarm_category->category_count;
 
                         $analytics_customer = AnalyticsCustomer::select('category_id')->where('customer_id', $customerId)->distinct()->get();
 
@@ -196,20 +219,41 @@ class AlarmSmartExecuteController extends Controller
                                 $array_name = $j == 0 ? 'one' : ($j == 1 ? 'two' : 'tree');
                                 // dd($j ,$array_name ,$analytics_customer[$j]->product_id) ;
                                 if ($count_analytics > 0) {
-                                    $dataOffer['category_id_' . $array_name] = $analytics_customer[$j]->category_id;
+                                    // $Category = Category::where('id', $analytics_customer[$j]->category_id)->first();
+                                    $ASOfferData = array();
+                                    $ASOfferData['customer_id'] = $customerId;
+                                    $ASOfferData['category_id'] = $analytics_customer[$j]->category_id;
+
+                                    if ($dataOffer['setting_discount'] == 'safe') {
+                                        $ASOfferData['category_discount'] = 'safe';
+                                        $ASOfferData['category_discount_precentage'] = 0.55;
+                                    } else if ($dataOffer['setting_discount'] == 'special') {
+                                        $ASOfferData['category_discount'] = 'special';
+                                        $ASOfferData['category_discount_precentage'] = 0.25;
+                                    } else if ($dataOffer['setting_discount'] == 'exceptional') {
+                                        $ASOfferData['category_discount'] = 'exceptional';
+                                        $ASOfferData['category_discount_precentage'] = 0.15;
+                                    } else {
+                                        $ASOfferData['category_discount'] = 'none';
+                                        $ASOfferData['category_discount_precentage'] = 0;
+                                    }
+
+                                    $ASOfferData['category_discription'] = '';
+                                    $AlarmSmartOfferCategory = AlarmSmartOfferCategory::Create($ASOfferData);
+                                    $dataOffer['as_category_id_' . $array_name] = $AlarmSmartOfferCategory->id;
                                 } else {
-                                    $dataOffer['category_id_' . $array_name] = $analytics_customer[0]->category_id;
+                                    $dataOffer['as_category_id_' . $array_name] = $analytics_customer[0]->category_id;
                                     // $category_id_array = HistoryCustomerOrderProduct::select('category_id')->distinct()->get();
 
                                     // if ($category_id_array != null && count($category_id_array) >= 1) {
 
                                     //     if (count($category_id_array) == 1) {
                                     //         if ($j == 1) {
-                                    //             $dataOffer['category_id_two'] = $analytics_customer[0]->category_id;
-                                    //             $dataOffer['category_id_tree'] = $category_id_array[0];
+                                    //             $dataOffer['as_category_id_two'] = $analytics_customer[0]->category_id;
+                                    //             $dataOffer['as_category_id_tree'] = $category_id_array[0];
                                     //             $count_analytics--;
                                     //         } else if ($j == 2) {
-                                    //             $dataOffer['category_id_tree'] = $category_id_array[0];
+                                    //             $dataOffer['as_category_id_tree'] = $category_id_array[0];
                                     //         }
                                     //         $count_analytics--;
                                     //     } else {
@@ -225,7 +269,7 @@ class AlarmSmartExecuteController extends Controller
                                     //             $category_count_max = max($sum_purchase_count_array);
                                     //             $key = array_keys($sum_purchase_count_array, $category_count_max)[0];
 
-                                    //             $dataOffer['category_id_two'] = $category_id_array[$key];
+                                    //             $dataOffer['as_category_id_two'] = $category_id_array[$key];
 
                                     //             unset($sum_purchase_count_array[$key]);
                                     //             unset($category_id_array[$key]);
@@ -233,24 +277,24 @@ class AlarmSmartExecuteController extends Controller
                                     //             $category_count_max = max($sum_purchase_count_array);
                                     //             $key = array_keys($sum_purchase_count_array, $category_count_max)[0];
 
-                                    //             $dataOffer['category_id_tree'] = $category_id_array[$key];
+                                    //             $dataOffer['as_category_id_tree'] = $category_id_array[$key];
                                     //             $count_analytics--;
                                     //         } else if ($j == 2) {
                                     //             $category_count_max = max($sum_purchase_count_array);
                                     //             $key = array_keys($sum_purchase_count_array, $category_count_max)[0];
 
-                                    //             $dataOffer['category_id_tree'] = $category_id_array[$key];
+                                    //             $dataOffer['as_category_id_tree'] = $category_id_array[$key];
                                     //         }
                                     //         $count_analytics--;
                                     //     }
 
                                     // } else {
                                     //     if ($j == 1) {
-                                    //         $dataOffer['product_id_two'] = $analytics_customer[0]->product_id;
-                                    //         $dataOffer['product_id_tree'] = $analytics_customer[0]->product_id;
+                                    //         $dataOffer['as_category_id_two'] = $analytics_customer[0]->category_id;
+                                    //         $dataOffer['as_category_id_tree'] = $analytics_customer[0]->category_id;
                                     //         $count_analytics--;
                                     //     } else if ($j == 2) {
-                                    //         $dataOffer['product_id_tree'] = $analytics_customer[0]->product_id;
+                                    //         $dataOffer['as_category_id_tree'] = $analytics_customer[0]->category_id;
                                     //     }
                                     //     $count_analytics--;
                                     // }
@@ -284,24 +328,27 @@ class AlarmSmartExecuteController extends Controller
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         // $AlarmSmartExecute['head_list'] = array();
-        if ($input['alarm_status_id'] == 0) {
-            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_category_id', $input['alarm_category_id'])->get();
-
+        if ($input['alarm_status_id'] == 0 && $input['alarm_smart_category_id'] == 0) {
+            $AlarmSmartExecute = AlarmSmartExecute::get();
+        }else if($input['alarm_smart_category_id'] == 0){
+            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_status_id', $input['alarm_status_id'])->get();
+        }else if($input['alarm_status_id'] == 0){
+            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_smart_category_id', $input['alarm_smart_category_id'])->get();
         } else {
-            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_category_id', $input['alarm_category_id'])->where('alarm_status_id', $input['alarm_status_id'])->get();
-
+            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_smart_category_id', $input['alarm_smart_category_id'])->where('alarm_status_id', $input['alarm_status_id'])->get();
         }
 
-        // dd(count($AlarmSmartExecute));
+        // dd($AlarmSmartExecute);
         for ($i = 0; $i < count($AlarmSmartExecute); $i++) {
-            $AlarmSmartExecute[$i]['alarm_category_name'] = AlarmCategory::where('id', $input['alarm_category_id'])->first()->name_fa;
+
+            $AlarmSmartExecute[$i]['alarm_smart_category_name'] = AlarmSmartCategory::where('id', $AlarmSmartExecute[$i]->alarm_smart_category_id)->first()->name_fa;
 
             $DateNow = now()->toJalali();
 
-            $now = str_replace('-0', '-', strval(substr($DateNow, 0, 10)));
-            $a = '[' . str_replace('-', ',', $now) . ']';
-            $b = json_decode($a);
-            $dateSpella = Verta::jalaliToGregorian($b[0], $b[1], $b[2]);
+            // $now = str_replace('-0', '-', strval(substr($DateNow, 0, 10)));
+            // $a = '[' . str_replace('-', ',', $now) . ']';
+            // $b = json_decode($a);
+            // $dateSpella = Verta::jalaliToGregorian($b[0], $b[1], $b[2]);
 
             $executeday = $AlarmSmartExecute[$i]->date;
             // $i==0 ? dd($customerId ,$customer,$executeday) : null;
@@ -333,6 +380,21 @@ class AlarmSmartExecuteController extends Controller
 
                 $customer = Customer::where('id', $customer_id)->first();
                 $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_name'] = $customer->name . ' ' . $customer->family;
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_gender'] = $customer->gender == 'male' ? 'آقای ' : ($customer->gender == 'female' ? 'خانم ' : '');
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_job'] = 'معلم';
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_interest'] = 'ورزش';
+
+                $birthday = $customer->birth;
+                // $i==0 ? dd($customerId ,$customer,$Birthday) : null;
+                $birth = str_replace('-0', '-', $birthday);
+                $e = '[' . str_replace('-', ',', $birth) . ']';
+                $g = json_decode($e);
+                $dateSpelld = Verta::jalaliToGregorian($g[0], $g[1], $g[2]);
+                $BirthDate = $dateSpelld != null ? $dateSpelld[0] . '-' . $dateSpelld[1] . '-' . $dateSpelld[2] : '';
+
+                $diffYearAge = verta($BirthDate)->diffYears($DateNow, false);
+
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_age'] = abs($diffYearAge);
 
                 $AlarmSmartExecute[$i]['customer_offer_list'][$j]['alarm_status_name'] = $AlarmStatus->where('id', $AlarmSmartExecute[$i]['customer_offer_list'][$j]['alarm_status_id'])->first()->name_fa;
             }

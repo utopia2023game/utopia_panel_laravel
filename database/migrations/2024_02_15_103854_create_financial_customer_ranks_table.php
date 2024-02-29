@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('history_customer_shares', function (Blueprint $table) {
+        Schema::create('financial_customer_ranks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('device_history_id')->constrained('history_customer_devices')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignId('product_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->text('execute_time')->nullable();
-            $table->text('status')->nullable();
-            $table->text('message')->nullable();
+            $table->text('product_price_rank')->nullable();
+            $table->text('avg_purchase_rank')->nullable();
+            $table->text('total_purchase_rank')->nullable();
+            $table->text('job_rank')->nullable();
+            $table->text('final_rank')->nullable();
             $table->timestampsTz();
             $table->softDeletesTz();
         });
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::dropIfExists('history_customer_shares');
+        Schema::dropIfExists('financial_customer_ranks');
     }
 };

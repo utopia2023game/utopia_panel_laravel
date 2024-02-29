@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Models\HistoryCustomerOrderProduct;
-use App\Models\OriginalFinancialRank;
+use App\Models\FinancialCustomer;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
-class OriginalFinancialRankController extends Controller
+class FinancialCustomerController extends Controller
 {
-    public static function setOriginalFinancialRank()
+    public static function setFinancialCustomer()
     {
         $data = array();
         $input = Request()->all();
@@ -66,9 +66,9 @@ class OriginalFinancialRankController extends Controller
 
         // dd($data);
         try {
-            OriginalFinancialRank::truncate();
+            FinancialCustomer::truncate();
 
-            OriginalFinancialRank::create($data);
+            FinancialCustomer::create($data);
         } catch (\Throwable $th) {
             //throw $th;
         }

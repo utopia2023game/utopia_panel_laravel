@@ -4,12 +4,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
-use App\Http\Controllers\AlarmCategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\AddressController;
-use App\Http\Controllers\AlarmSmartExecuteController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProductController;
@@ -18,10 +16,13 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\HistoryCustomerController;
+use App\Http\Controllers\AlarmSmartExecuteController;
 use App\Http\Controllers\AnalyticsCustomerController;
-use App\Http\Controllers\CustomerFinancialRankController;
+use App\Http\Controllers\FinancialCustomerController;
+use App\Http\Controllers\AlarmSmartCategoryController;
+use App\Http\Controllers\FinancialCustomerRankController;
+use App\Http\Controllers\AlarmSmartOfferCustomerController;
 use App\Http\Controllers\HistoryCustomerOrderProductController;
-use App\Http\Controllers\OriginalFinancialRankController;
 use App\Http\ControllersManagement\Controller as ManagementController;
 use App\Http\ControllersManagement\CategoryController as ManagementCategoryController;
 
@@ -115,12 +116,14 @@ Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->na
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
 
 Route::post('set_birth_execute_list', [AlarmSmartExecuteController::class, 'setBirthExecuteList'])->name('setBirthExecuteList');
-Route::post('get_execute_list_alarm_by_status', [AlarmSmartExecuteController::class, 'getExecuteListAlarmByStatus'])->name('getExecuteListAlarmByStatus');
+Route::post('get_execute_list_alarm_smart_by_status', [AlarmSmartExecuteController::class, 'getExecuteListAlarmByStatus'])->name('getExecuteListAlarmByStatus');
 
-Route::post('list_alarm_category', [AlarmCategoryController::class, 'listAlarmCategory'])->name('listAlarmCategory');
+Route::post('list_alarm_category', [AlarmSmartCategoryController::class, 'listAlarmSmartCategory'])->name('listAlarmSmartCategory');
 
-Route::post('set_original_financial_rank', [OriginalFinancialRankController::class, 'setOriginalFinancialRank'])->name('setOriginalFinancialRank');
-Route::post('set_customer_financial_rank', [CustomerFinancialRankController::class, 'setCustomerFinancialRank'])->name('setCustomerFinancialRank');
+Route::post('set_financial_customer', [FinancialCustomerController::class, 'setFinancialCustomer'])->name('setFinancialCustomer');
+Route::post('set_financial_customer_rank', [FinancialCustomerRankController::class, 'setFinancialCustomerRank'])->name('setFinancialCustomerRank');
+
+Route::post('get_offer_customer_information', [AlarmSmartOfferCustomerController::class, 'getOfferCustomerInformation'])->name('getOfferCustomerInformation');
 
 Route::post('customer_perfermance_computing_oprations', [AnalyticsCustomerController::class, 'customerPerfermanceComputingOprations'])->name('customerPerfermanceComputingOprations');
 

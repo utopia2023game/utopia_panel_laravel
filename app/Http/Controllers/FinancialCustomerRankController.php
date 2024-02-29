@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\CustomerFinancialRank;
+use App\Models\FinancialCustomerRank;
 use App\Models\HistoryCustomerOrderProduct;
-use App\Models\OriginalFinancialRank;
+use App\Models\FinancialCustomer;
 
-class CustomerFinancialRankController extends Controller
+class FinancialCustomerRankController extends Controller
 {
-    public function setCustomerFinancialRank()
+    public function setFinancialCustomerRank()
     {
 
-        OriginalFinancialRankController::setOriginalFinancialRank();
+        FinancialCustomerController::setFinancialCustomer();
 
-        $original_financial_rank = OriginalFinancialRank::first();
+        $original_financial_rank = FinancialCustomer::first();
 
         // $avg_purchase_low_price = $original_financial_rank->avg_purchase_low_price;
         $avg_purchase_mid_low_price = $original_financial_rank->avg_purchase_mid_low_price;
@@ -59,11 +59,11 @@ class CustomerFinancialRankController extends Controller
                     $data['total_purchase_rank'] = "high";
                 }
 
-                if (CustomerFinancialRank::where('customer_id', $customerId)->exists()) {
-                    CustomerFinancialRank::where('customer_id', $customerId)->update($data);
+                if (FinancialCustomerRank::where('customer_id', $customerId)->exists()) {
+                    FinancialCustomerRank::where('customer_id', $customerId)->update($data);
                 } else {
                     $data['customer_id'] = $customerId;
-                    CustomerFinancialRank::create($data);
+                    FinancialCustomerRank::create($data);
                 }
             }
 

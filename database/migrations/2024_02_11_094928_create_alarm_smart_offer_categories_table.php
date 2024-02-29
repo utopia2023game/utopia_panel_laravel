@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_financial_ranks', function (Blueprint $table) {
+        Schema::create('alarm_smart_offer_categories', function (Blueprint $table) {
             $table->id();
+            $table->boolean('edit')->default(0);
             $table->foreignId('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->text('product_price_rank')->nullable();
-            $table->text('avg_purchase_rank')->nullable();
-            $table->text('total_purchase_rank')->nullable();
-            $table->text('job_rank')->nullable();
-            $table->text('final_rank')->nullable();
+            $table->foreignId('category_id')->nullable()->constrained()->cascadeOnUpdate()->restrictOnDelete();
+            $table->text('category_discount')->nullable();
+            $table->text('category_discount_precentage')->nullable();
+            $table->text('category_discription')->nullable();
             $table->timestampsTz();
             $table->softDeletesTz();
         });
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer_financial_ranks');
+        Schema::dropIfExists('alarm_smart_offer_categories');
     }
 };
