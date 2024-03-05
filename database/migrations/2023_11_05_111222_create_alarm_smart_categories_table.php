@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('delay_day_execute')->default(10);
             $table->integer('product_count')->default(1);
             $table->integer('category_count')->default(1);
-            $table->text('discount_tag')->nullable();
+            $table->integer('discount_status_id')->default(1)->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
             $table->text('send_time')->nullable();
             $table->boolean('send_sms')->default(1);
             $table->boolean('send_notification')->default(1);

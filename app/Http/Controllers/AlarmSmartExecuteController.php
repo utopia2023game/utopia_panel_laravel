@@ -10,8 +10,10 @@ use App\Models\AlarmSmartOfferCustomer;
 use App\Models\AlarmSmartOfferProduct;
 use App\Models\AlarmStatus;
 use App\Models\AnalyticsCustomer;
-use App\Models\Category;
 use App\Models\Customer;
+use App\Models\DiscountStatus;
+use App\Models\HistoryCustomerLike;
+use App\Models\HistoryCustomerNextCart;
 use App\Models\HistoryCustomerOrderProduct;
 use App\Models\Product;
 use Hekmatinasser\Verta\Verta;
@@ -19,6 +21,101 @@ use Illuminate\Http\Request;
 
 class AlarmSmartExecuteController extends Controller
 {
+    public function getExecuteListAlarmByStatus()
+    {
+
+        $input = Request()->all();
+
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
+
+        // $AlarmSmartExecute['head_list'] = array();
+        if ($input['alarm_status_id'] == 0 && $input['alarm_smart_category_id'] == 0) {
+            $AlarmSmartExecute = AlarmSmartExecute::get();
+        } else if ($input['alarm_smart_category_id'] == 0) {
+            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_status_id', $input['alarm_status_id'])->get();
+        } else if ($input['alarm_status_id'] == 0) {
+            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_smart_category_id', $input['alarm_smart_category_id'])->get();
+        } else {
+            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_smart_category_id', $input['alarm_smart_category_id'])->where('alarm_status_id', $input['alarm_status_id'])->get();
+        }
+
+        // dd($AlarmSmartExecute);
+        for ($i = 0; $i < count($AlarmSmartExecute); $i++) {
+
+            $AlarmSmartExecute[$i]['alarm_smart_category_name'] = AlarmSmartCategory::where('id', $AlarmSmartExecute[$i]->alarm_smart_category_id)->first()->name_fa;
+
+            $DateNow = now()->toJalali();
+
+            // $now = str_replace('-0', '-', strval(substr($DateNow, 0, 10)));
+            // $a = '[' . str_replace('-', ',', $now) . ']';
+            // $b = json_decode($a);
+            // $dateSpella = Verta::jalaliToGregorian($b[0], $b[1], $b[2]);
+
+            $executeday = $AlarmSmartExecute[$i]->date;
+            // $i==0 ? dd($customerId ,$customer,$executeday) : null;
+            $day = str_replace('-0', '-', $executeday);
+            $c = '[' . str_replace('-', ',', $day) . ']';
+            $d = json_decode($c);
+            $dateSpellc = Verta::jalaliToGregorian($d[0], $d[1], $d[2]);
+            $ExecuteDate = $dateSpellc != null ? $dateSpellc[0] . '-' . $dateSpellc[1] . '-' . $dateSpellc[2] . ' ' . $AlarmSmartExecute[$i]->setting_send_time : '';
+
+            $diffDays = verta($ExecuteDate)->diffdays($DateNow, false);
+
+            $diffHours = verta($ExecuteDate)->diffHours($DateNow, false);
+
+            // $i == 0 ? dd(strval(verta($ExecuteDate)), strval($DateNow), $diffDays, $diffHours) : null;
+
+            $AlarmSmartExecute[$i]['diff_days'] = round($diffDays);
+            $AlarmSmartExecute[$i]['diff_hours'] = round($diffHours);
+
+            $AlarmStatus = AlarmStatus::get();
+            $AlarmSmartExecute[$i]['alarm_status_name'] = $AlarmStatus->where('id', $AlarmSmartExecute[$i]['alarm_status_id'])->first()->name_fa;
+
+            $DiscountStatus = DiscountStatus::get();
+            $AlarmSmartExecute[$i]['setting_discount_status_name'] = $DiscountStatus->where('id', $AlarmSmartExecute[$i]['setting_discount_status_id'])->first()->name_fa;
+            // dd(gettype($AlarmSmartExecute));
+            $AlarmSmartExecute[$i]['customer_offer_list'] = array();
+
+            // dd($AlarmSmartExecute[$i]->id);
+            $AlarmSmartExecute[$i]['customer_offer_list'] = AlarmSmartOfferCustomer::where('alarm_smart_execute_id', $AlarmSmartExecute[$i]->id)->get();
+
+            for ($j = 0; $j < count($AlarmSmartExecute[$i]['customer_offer_list']); $j++) {
+                $customer_id = $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_id'];
+
+                $customer = Customer::where('id', $customer_id)->first();
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_name'] = $customer->name . ' ' . $customer->family;
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_gender'] = $customer->gender == 'male' ? 'آقای ' : ($customer->gender == 'female' ? 'خانم ' : '');
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_job'] = 'معلم';
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_interest'] = 'ورزش';
+
+                $DiscountStatus = DiscountStatus::get();
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['setting_discount_status_name'] = $DiscountStatus->where('id', $AlarmSmartExecute[$i]['customer_offer_list'][$j]['setting_discount_status_id'])->first()->name_fa;
+
+                $birthday = $customer->birth;
+                // $i==0 ? dd($customerId ,$customer,$Birthday) : null;
+                $birth = str_replace('-0', '-', $birthday);
+                $e = '[' . str_replace('-', ',', $birth) . ']';
+                $g = json_decode($e);
+                $dateSpelld = Verta::jalaliToGregorian($g[0], $g[1], $g[2]);
+                $BirthDate = $dateSpelld != null ? $dateSpelld[0] . '-' . $dateSpelld[1] . '-' . $dateSpelld[2] : '';
+
+                $diffYearAge = verta($BirthDate)->diffYears($DateNow, false);
+
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_age'] = abs($diffYearAge);
+
+                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['alarm_status_name'] = $AlarmStatus->where('id', $AlarmSmartExecute[$i]['customer_offer_list'][$j]['alarm_status_id'])->first()->name_fa;
+            }
+
+            // dd($AlarmSmartExecute);
+        }
+
+        // dd(count($AlarmSmartExecute[0]['customer_offer_list']));
+
+        // dd($a);
+        // dd($AlarmSmartExecute);
+        // echo($AlarmSmartExecute);
+        return $AlarmSmartExecute;
+    }
     public function setBirthExecuteList()
     {
         $input = Request()->all();
@@ -320,93 +417,125 @@ class AlarmSmartExecuteController extends Controller
         dd($customer_array);
     }
 
-    public function getExecuteListAlarmByStatus()
+    public function setLikeExecuteList()
     {
-
         $input = Request()->all();
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
-        // $AlarmSmartExecute['head_list'] = array();
-        if ($input['alarm_status_id'] == 0 && $input['alarm_smart_category_id'] == 0) {
-            $AlarmSmartExecute = AlarmSmartExecute::get();
-        }else if($input['alarm_smart_category_id'] == 0){
-            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_status_id', $input['alarm_status_id'])->get();
-        }else if($input['alarm_status_id'] == 0){
-            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_smart_category_id', $input['alarm_smart_category_id'])->get();
-        } else {
-            $AlarmSmartExecute = AlarmSmartExecute::where('alarm_smart_category_id', $input['alarm_smart_category_id'])->where('alarm_status_id', $input['alarm_status_id'])->get();
+        $a = AlarmSmartOfferCustomer::select('customer_id')->distinct()->where('alarm_smart_execute_id', 6)->where('alarm_status_id', 1)->get()->toArray();
+
+        $categoryIdCookedArray = array();
+        for ($i = 0; $i < count($a); $i++) {
+            array_push($categoryIdCookedArray, $a[$i]['customer_id']);
         }
 
-        // dd($AlarmSmartExecute);
-        for ($i = 0; $i < count($AlarmSmartExecute); $i++) {
+        // dd($categoryIdCookedArray);
+        $b = HistoryCustomerLike::select('customer_id')->distinct()->get()->toArray();
 
-            $AlarmSmartExecute[$i]['alarm_smart_category_name'] = AlarmSmartCategory::where('id', $AlarmSmartExecute[$i]->alarm_smart_category_id)->first()->name_fa;
+        $customer_id_array = array();
+        for ($i = 0; $i < count($b); $i++) {
+            array_push($customer_id_array, $b[$i]['customer_id']);
+        }
 
-            $DateNow = now()->toJalali();
+        // dd($customer_id_array);
+        $diff_customer_id_array = array_values(array_diff($customer_id_array, $categoryIdCookedArray));
+        // dd($diff_customer_id_array);
 
-            // $now = str_replace('-0', '-', strval(substr($DateNow, 0, 10)));
-            // $a = '[' . str_replace('-', ',', $now) . ']';
-            // $b = json_decode($a);
-            // $dateSpella = Verta::jalaliToGregorian($b[0], $b[1], $b[2]);
+        $customer_array = array();
+        $DateNow = now()->toJalali();
 
-            $executeday = $AlarmSmartExecute[$i]->date;
-            // $i==0 ? dd($customerId ,$customer,$executeday) : null;
-            $day = str_replace('-0', '-', $executeday);
-            $c = '[' . str_replace('-', ',', $day) . ']';
-            $d = json_decode($c);
-            $dateSpellc = Verta::jalaliToGregorian($d[0], $d[1], $d[2]);
-            $ExecuteDate = $dateSpellc != null ? $dateSpellc[0] . '-' . $dateSpellc[1] . '-' . $dateSpellc[2] . ' ' . $AlarmSmartExecute[$i]->setting_send_time : '';
+        for ($i = 0; $i < count($diff_customer_id_array); $i++) {
+            $index = count($customer_array);
+            $customer_array[$index]['customer_id'] = $diff_customer_id_array[$i];
 
-            $diffDays = verta($ExecuteDate)->diffdays($DateNow, false);
+            $likeProduct = HistoryCustomerLike::select('product_id')->distinct()->where('customer_id', $diff_customer_id_array[$i])->get()->toArray();
 
-            $diffHours = verta($ExecuteDate)->diffHours($DateNow, false);
+            // dd($likeProduct);
+            $informationLikeArray = array();
+            for ($j = 0; $j < count($likeProduct); $j++) {
+                $like = HistoryCustomerLike::where('product_id', $likeProduct[$j]['product_id'])->where('customer_id', $diff_customer_id_array[$i])->get();
 
-            // $i == 0 ? dd(strval(verta($ExecuteDate)), strval($DateNow), $diffDays, $diffHours) : null;
+                $c = array();
+                $c['product_id'] = $likeProduct[$j]['product_id'];
+                $c['count_like'] = count($like);
+                $c['last_like'] = $like->last()->toArray()['like'];
 
-            $AlarmSmartExecute[$i]['diff_days'] = round($diffDays);
-            $AlarmSmartExecute[$i]['diff_hours'] = round($diffHours);
+                array_push($informationLikeArray, $c);
 
-            $AlarmStatus = AlarmStatus::get();
-            $AlarmSmartExecute[$i]['alarm_status_name'] = $AlarmStatus->where('id', $AlarmSmartExecute[$i]['alarm_status_id'])->first()->name_fa;
-            // dd(gettype($AlarmSmartExecute));
-            $AlarmSmartExecute[$i]['customer_offer_list'] = array();
-
-            // dd($AlarmSmartExecute[$i]->id);
-            $AlarmSmartExecute[$i]['customer_offer_list'] = AlarmSmartOfferCustomer::where('alarm_smart_execute_id', $AlarmSmartExecute[$i]->id)->get();
-
-            for ($j = 0; $j < count($AlarmSmartExecute[$i]['customer_offer_list']); $j++) {
-                $customer_id = $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_id'];
-
-                $customer = Customer::where('id', $customer_id)->first();
-                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_name'] = $customer->name . ' ' . $customer->family;
-                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_gender'] = $customer->gender == 'male' ? 'آقای ' : ($customer->gender == 'female' ? 'خانم ' : '');
-                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_job'] = 'معلم';
-                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_interest'] = 'ورزش';
-
-                $birthday = $customer->birth;
-                // $i==0 ? dd($customerId ,$customer,$Birthday) : null;
-                $birth = str_replace('-0', '-', $birthday);
-                $e = '[' . str_replace('-', ',', $birth) . ']';
-                $g = json_decode($e);
-                $dateSpelld = Verta::jalaliToGregorian($g[0], $g[1], $g[2]);
-                $BirthDate = $dateSpelld != null ? $dateSpelld[0] . '-' . $dateSpelld[1] . '-' . $dateSpelld[2] : '';
-
-                $diffYearAge = verta($BirthDate)->diffYears($DateNow, false);
-
-                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['customer_age'] = abs($diffYearAge);
-
-                $AlarmSmartExecute[$i]['customer_offer_list'][$j]['alarm_status_name'] = $AlarmStatus->where('id', $AlarmSmartExecute[$i]['customer_offer_list'][$j]['alarm_status_id'])->first()->name_fa;
             }
+            // $i == 0 ? dd($informationLikeArray) : null;
+            // dd($c);
+            if(count($informationLikeArray) == 0 ){
+                continue;
+            }
+            array_push($customer_array[$index], $informationLikeArray);
 
-            // dd($AlarmSmartExecute);
         }
 
-        // dd(count($AlarmSmartExecute[0]['customer_offer_list']));
+        return $customer_array;
 
-        // dd($a);
-        // dd($AlarmSmartExecute);
-        // echo($AlarmSmartExecute);
-        return $AlarmSmartExecute;
     }
+
+    public function setNextCartExecuteList()
+    {
+        $input = Request()->all();
+
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
+
+        $a = AlarmSmartOfferCustomer::select('customer_id')->distinct()->where('alarm_smart_execute_id', 6)->where('alarm_status_id', 1)->get()->toArray();
+
+        $categoryIdCookedArray = array();
+        for ($i = 0; $i < count($a); $i++) {
+            array_push($categoryIdCookedArray, $a[$i]['customer_id']);
+        }
+
+        // dd($categoryIdCookedArray);
+        $b = HistoryCustomerNextCart::select('customer_id')->distinct()->get()->toArray();
+
+        $customer_id_array = array();
+        for ($i = 0; $i < count($b); $i++) {
+            array_push($customer_id_array, $b[$i]['customer_id']);
+        }
+
+        // dd($customer_id_array);
+        $diff_customer_id_array = array_values(array_diff($customer_id_array, $categoryIdCookedArray));
+        // dd($diff_customer_id_array);
+
+        $customer_array = array();
+        $DateNow = now()->toJalali();
+
+        for ($i = 0; $i < count($diff_customer_id_array); $i++) {
+            $index = count($customer_array);
+            $customer_array[$index]['customer_id'] = $diff_customer_id_array[$i];
+
+            $likeProduct = HistoryCustomerNextCart::select('product_id')->distinct()->where('customer_id', $diff_customer_id_array[$i])->get()->toArray();
+
+            // dd($likeProduct);
+            $informationLikeArray = array();
+            for ($j = 0; $j < count($likeProduct); $j++) {
+                $next_cart = HistoryCustomerNextCart::where('product_id', $likeProduct[$j]['product_id'])->where('customer_id', $diff_customer_id_array[$i])->get();
+                // dd($next_cart);
+                $c = array();
+                $c['product_id'] = $likeProduct[$j]['product_id'];
+                $c['count_next_cart'] = count($next_cart);
+                $c['last_increment_decrement'] = $next_cart->last()->toArray()['increment_decrement'];
+                $c['last_tab'] = $next_cart->last()->toArray()['tab'];
+
+                array_push($informationLikeArray, $c);
+
+            }
+            // $i == 0 ? dd($informationLikeArray) : null;
+            // dd($c);
+            if(count($informationLikeArray) == 0 ){
+                continue;
+            }
+            array_push($customer_array[$index], $informationLikeArray);
+
+        }
+
+        return $customer_array;
+
+    }
+
 }

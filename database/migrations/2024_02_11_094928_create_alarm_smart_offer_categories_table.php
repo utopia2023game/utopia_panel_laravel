@@ -16,7 +16,7 @@ return new class extends Migration
             $table->boolean('edit')->default(0);
             $table->foreignId('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('category_id')->nullable()->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->text('category_discount')->nullable();
+            $table->integer('category_discount_status_id')->default(1)->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
             $table->text('category_discount_precentage')->nullable();
             $table->text('category_discription')->nullable();
             $table->timestampsTz();

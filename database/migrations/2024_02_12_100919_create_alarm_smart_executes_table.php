@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('status')->default(1);
             $table->text('date')->nullable();
             $table->text('setting_send_time')->nullable();
-            $table->text('setting_discount')->nullable();
+            $table->integer('setting_discount_status_id')->default(1)->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
             $table->text('setting_product_count')->nullable();
             $table->text('setting_category_count')->nullable();
             $table->boolean('setting_sms')->default(1);

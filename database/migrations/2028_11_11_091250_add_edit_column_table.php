@@ -12,43 +12,48 @@ return new class extends Migration
     public function up(): void
     {
 
-        Schema::disableForeignKeyConstraints();
-        // if (Schema::hasTable('alarm_smart_customers')) {
-        //     Schema::rename('alarm_smart_customers', 'alarm_smart_offer_customers');
+        // Schema::disableForeignKeyConstraints();
+        // // if (Schema::hasTable('alarm_smart_customers')) {
+        // //     Schema::rename('alarm_smart_customers', 'alarm_smart_offer_customers');
+        // // }
+
+        // if (Schema::hasTable('alarm_smart_categories')) {
+        //     Schema::table('alarm_smart_categories', function (Blueprint $table) {
+        //         $table->dropColumn('discount_tag');
+        //         $table->foreignId('discount_status_id')->default(1)->after('category_count')->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
+        //     });
+        // }
+        // if (Schema::hasTable('alarm_smart_offer_products')) {
+        //     Schema::table('alarm_smart_offer_products', function (Blueprint $table) {
+        //         $table->dropColumn('product_discount');
+        //         $table->foreignId('product_discount_status_id')->default(1)->after('category_id')->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
+        //     });
+        // }
+        // if (Schema::hasTable('alarm_smart_offer_categories')) {
+        //     Schema::table('alarm_smart_offer_categories', function (Blueprint $table) {
+        //         $table->dropColumn('category_discount');
+        //         $table->foreignId('category_discount_status_id')->default(1)->after('category_id')->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
+        //     });
+        // }
+        // if (Schema::hasTable('alarm_smart_executes')) {
+        //     Schema::table('alarm_smart_executes', function (Blueprint $table) {
+        //         $table->dropColumn('setting_discount');
+        //         $table->foreignId('setting_discount_status_id')->default(1)->after('setting_send_time')->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
+        //     });
+        // }
+        // if (Schema::hasTable('alarm_smart_offer_customers')) {
+        //     Schema::table('alarm_smart_offer_customers', function (Blueprint $table) {
+        //         $table->dropColumn('setting_discount');
+        //         $table->foreignId('setting_discount_status_id')->default(1)->after('setting_send_time')->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
+        //     });
         // }
 
-        if (Schema::hasTable('alarm_smart_offer_customers')) {
-            Schema::table('alarm_smart_offer_customers', function (Blueprint $table) {
-                $table->boolean('seen')->default(0)->after('status');
-        // $table->boolean('product_id_one_status')->default(1)->change();
-        // $table->foreignId('as_product_id_one')->nullable()->after('product_id_one_status')->constrained('alarm_smart_offer_products')->cascadeOnUpdate()->restrictOnDelete();
-        // // $table->boolean('product_id_two_status')->default(0)->after('as_product_id_one')->change();
-        // $table->foreignId('as_product_id_two')->nullable()->after('product_id_two_status')->constrained('alarm_smart_offer_products')->cascadeOnUpdate()->restrictOnDelete();
-        // // $table->boolean('product_id_tree_status')->default(0)->after('as_product_id_two')->change();
-        // $table->foreignId('as_product_id_tree')->nullable()->after('product_id_tree_status')->constrained('alarm_smart_offer_products')->cascadeOnUpdate()->restrictOnDelete();
-        // // $table->boolean('category_id_one_status')->default(1)->after('as_product_id_tree')->change();
-        // $table->foreignId('as_category_id_one')->nullable()->after('category_id_one_status')->constrained('alarm_smart_offer_categories')->cascadeOnUpdate()->restrictOnDelete();
-        // // $table->boolean('category_id_two_status')->default(0)->after('as_category_id_one')->change();
-        // $table->foreignId('as_category_id_two')->nullable()->after('category_id_two_status')->constrained('alarm_smart_offer_categories')->cascadeOnUpdate()->restrictOnDelete();
-        // // $table->boolean('category_id_tree_status')->default(0)->after('as_category_id_two')->change();
-        // $table->foreignId('as_category_id_tree')->nullable()->after('category_id_tree_status')->constrained('alarm_smart_offer_categories')->cascadeOnUpdate()->restrictOnDelete();
-
-        //         $table->boolean('product_id_one_status')->default(0)->after('alarm_smart_category_id');
-        //         $table->foreignId('as_product_id_one')->nullable()->constrained('alarm_smart_categories')->cascadeOnUpdate()->restrictOnDelete()->after('product_id_one_status');
-        //         $table->boolean('product_id_two_status')->default(0)->after('as_product_id_one');
-        //         $table->foreignId('as_product_id_two')->nullable()->constrained('alarm_smart_categories')->cascadeOnUpdate()->restrictOnDelete()->after('product_id_two_status');
-        //         $table->boolean('product_id_tree_status')->default(0)->after('as_product_id_two');
-        //         $table->foreignId('as_product_id_tree')->nullable()->constrained('alarm_smart_categories')->cascadeOnUpdate()->restrictOnDelete()->after('product_id_tree_status');
-        //         $table->boolean('category_id_one_status')->default(0)->after('as_product_id_tree');
-        //         $table->foreignId('as_category_id_one')->nullable()->constrained('alarm_smart_categories')->cascadeOnUpdate()->restrictOnDelete()->after('category_id_one_status');
-        //         $table->boolean('category_id_two_status')->default(0)->after('as_category_id_one');
-        //         $table->foreignId('as_category_id_two')->nullable()->constrained('alarm_smart_categories')->cascadeOnUpdate()->restrictOnDelete()->after('category_id_two_status');
-        //         $table->boolean('category_id_tree_status')->default(0)->after('as_category_id_two');
-        //         $table->foreignId('as_category_id_tree')->nullable()->constrained('alarm_smart_categories')->cascadeOnUpdate()->restrictOnDelete()->after('category_id_tree_status');
-
-            });
-        }
-        Schema::enableForeignKeyConstraints();
+        // if (Schema::hasTable('discount_statuses')) {
+        //     Schema::table('discount_statuses', function (Blueprint $table) {
+        //         $table->boolean('status')->default(1)->after('id');
+        //     });
+        // }
+        // Schema::enableForeignKeyConstraints();
 
         // if (Schema::hasTable('history_customer_order_products')) {
         //     Schema::table('history_customer_order_products', function (Blueprint $table) {

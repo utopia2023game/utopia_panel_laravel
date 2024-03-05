@@ -116,6 +116,8 @@ Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->na
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
 
 Route::post('set_birth_execute_list', [AlarmSmartExecuteController::class, 'setBirthExecuteList'])->name('setBirthExecuteList');
+Route::post('set_like_execute_list', [AlarmSmartExecuteController::class, 'setLikeExecuteList'])->name('setLikeExecuteList');
+Route::post('set_next_cart_execute_list', [AlarmSmartExecuteController::class, 'setNextCartExecuteList'])->name('setNextCartExecuteList');
 Route::post('get_execute_list_alarm_smart_by_status', [AlarmSmartExecuteController::class, 'getExecuteListAlarmByStatus'])->name('getExecuteListAlarmByStatus');
 
 Route::post('list_alarm_category', [AlarmSmartCategoryController::class, 'listAlarmSmartCategory'])->name('listAlarmSmartCategory');
@@ -124,6 +126,7 @@ Route::post('set_financial_customer', [FinancialCustomerController::class, 'setF
 Route::post('set_financial_customer_rank', [FinancialCustomerRankController::class, 'setFinancialCustomerRank'])->name('setFinancialCustomerRank');
 
 Route::post('get_offer_customer_information', [AlarmSmartOfferCustomerController::class, 'getOfferCustomerInformation'])->name('getOfferCustomerInformation');
+Route::post('set_alarm_smart_offer_product_category_status', [AlarmSmartOfferCustomerController::class, 'setAlarmSmartOfferProductCategoryStatus'])->name('setAlarmSmartOfferProductCategoryStatus');
 
 Route::post('customer_perfermance_computing_oprations', [AnalyticsCustomerController::class, 'customerPerfermanceComputingOprations'])->name('customerPerfermanceComputingOprations');
 

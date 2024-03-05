@@ -33,7 +33,7 @@ return new class extends Migration
             $table->boolean('setting_edit')->default(0);
             $table->text('setting_send_date')->nullable();
             $table->text('setting_send_time')->nullable();
-            $table->text('setting_discount')->nullable();
+            $table->integer('setting_discount_status_id')->default(1)->constrained('discount_statuses')->cascadeOnUpdate()->restrictOnDelete();
             $table->integer('setting_product_count')->default(1);
             $table->integer('setting_category_count')->default(1);
             $table->boolean('setting_sms')->default(1);
