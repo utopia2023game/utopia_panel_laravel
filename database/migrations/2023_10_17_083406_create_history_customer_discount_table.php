@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('next_carts', function (Blueprint $table) {
+        Schema::create('history_customer_discounts', function (Blueprint $table) {
             $table->id();
-            $table->boolean('status')->default(1);
+            $table->foreignId('device_history_id')->constrained('history_customer_devices')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreignId('product_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
-            $table->integer('count_selected')->default(0);
-            $table->double('sale_price')->default(0);
-            $table->double('discount_price')->default(0);
+            $table->foreignId('discount_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
+            $table->text('execute_time')->nullable();
+            $table->text('status')->nullable();
+            $table->text('message')->nullable();
             $table->timestampsTz();
             $table->softDeletesTz();
         });
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::dropIfExists('next_carts');
+        // Schema::dropIfExists('history_customer_discounts');
     }
 };

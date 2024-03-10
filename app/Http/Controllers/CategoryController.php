@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use App\Models\Media;
 use App\Helpers\Helper;
-use App\Models\Product;
+use App\Models\Cart;
 use App\Models\Category;
+use App\Models\Media;
+use App\Models\Product;
+use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Models\HistoryCustomerDevice;
-use Illuminate\Support\Facades\Schema;
-use App\Models\HistoryCustomerCategory;
 
 class CategoryController extends Controller
 {
@@ -23,13 +20,13 @@ class CategoryController extends Controller
 
         $request->validate([
             'name' => 'required',
-            'parent_id' => 'nullable|numeric'
+            'parent_id' => 'nullable|numeric',
         ]);
 
         if (Category::where('id', $input['parent_id'])->exists()) {
             Category::create([
                 'name' => $input['name'],
-                'parent_id' => $input['parent_id']
+                'parent_id' => $input['parent_id'],
             ]);
             return 1;
         } else if ($input['parent_id'] == '') {
@@ -50,16 +47,15 @@ class CategoryController extends Controller
 
         $request->validate([
             'name' => 'required',
-            'id' => 'nullable|numeric'
+            'id' => 'nullable|numeric',
         ]);
 
         $result = Category::where('id', $input['id'])->update([
-            'name' => $request->name
+            'name' => $request->name,
         ]);
 
         return $result;
     }
-
 
     public function restore(Request $request)
     {
@@ -68,7 +64,7 @@ class CategoryController extends Controller
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
-            'id' => 'nullable|numeric'
+            'id' => 'nullable|numeric',
         ]);
 
         $result = Category::where('id', $input['id'])->restore();
@@ -83,7 +79,7 @@ class CategoryController extends Controller
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
-            'id' => 'nullable|numeric'
+            'id' => 'nullable|numeric',
         ]);
 
         if (Category::where('id', $input['id'])->exists()) {
@@ -108,7 +104,7 @@ class CategoryController extends Controller
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
-            'id' => 'nullable|numeric'
+            'id' => 'nullable|numeric',
         ]);
 
         if (Category::where('id', $input['id'])->exists()) {
@@ -133,10 +129,8 @@ class CategoryController extends Controller
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $request->validate([
-            'id' => 'nullable|numeric'
+            'id' => 'nullable|numeric',
         ]);
-
-
 
         if (Category::where('id', $input['id'])->exists()) {
             $category_data = Category::where('id', $input['id']);
@@ -181,8 +175,6 @@ class CategoryController extends Controller
             return 0;
         }
 
-
-
     }
 
     public function listCategory(Request $request)
@@ -200,7 +192,6 @@ class CategoryController extends Controller
         return $categories;
     }
 
-    
     public function categoryChildrenListByCatId(Request $request)
     {
         $input = $request->all();
@@ -209,6 +200,7 @@ class CategoryController extends Controller
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
+        $customer_id = $input['customer_id'];
         $search = $input['search'];
         $filter = $input['filter'];
         $hashtag = $input['hashtag'];
@@ -235,8 +227,6 @@ class CategoryController extends Controller
 
             $items[1] = Category::where('parent_id', $input['data_by_cat_id'])->get();
         }
-
-
 
         if (!empty($search) && !empty($sort)) {
             if ($sort == 'popular') {
@@ -295,7 +285,18 @@ class CategoryController extends Controller
                         $a = Media::where('product_id', $products[$i]['id'])->where('type', 'image')->first();
                     }
                     $products[$i]['thumbnail_image'] = $a == null ? "" : $a['path'];
-                    $items[2][count($items[2])] = $products[$i];
+                    $products[$i]['count_selected'] = 0;
+
+                    if ($customer_id != 0) {
+                        if (Cart::where('customer_id', $customer_id)->where('product_id', $products[$i]['id'])->exists()) {
+                            $carts = Cart::where('customer_id', $customer_id)->where('product_id', $products[$i]['id'])->first()->toArray();
+                            $products[$i]['count_selected'] = $carts['count_selected'];
+                            // dd($carts);
+                        }
+                    }
+
+                    array_push($items[2], $products[$i]);
+                    // $items[2][count($items[2])] = $products[$i];
                 }
             }
         }
@@ -346,7 +347,6 @@ class CategoryController extends Controller
         } else {
             return 0;
         }
-
 
         // if($var1 === $var2){
         //     return true;

@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\SliderController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\NextCartController;
 use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\HistoryCustomerController;
 use App\Http\Controllers\AlarmSmartExecuteController;
@@ -86,6 +88,15 @@ Route::post('login_mobile_password', [Controller::class, 'loginMobilePassword'])
 Route::post('login_overview_with_password', [Controller::class, 'loginMobileOverViewPasswordIdb'])->name('loginMobileOverViewPasswordIdb');
 
 Route::post('store_list', [StoreController::class, 'storeList'])->name('storeList');
+
+
+Route::post('list_next_carts', [NextCartController::class, 'listNextCarts'])->name('listNextCarts');
+Route::post('transfer_next_cart_to_cart_in_server', [NextCartController::class, 'transferNextCartToCartInServer'])->name('transferNextCartToCartInServer');
+Route::post('delete_next_cart_item_in_server', [NextCartController::class, 'deleteNextCartItemInServer'])->name('deleteNextCartItemInServer');
+
+Route::post('list_carts', [CartController::class, 'listCarts'])->name('listCarts');
+Route::post('set_increment_decrement_cart', [CartController::class, 'setIncrementDecrementCartInServer'])->name('setIncrementDecrementCartInServer');
+Route::post('transfer_cart_to_next_cart_in_server', [CartController::class, 'transferCartToNextCartInServer'])->name('transferCartToNextCartInServer');
 
 Route::post('list_order_status', [OrderStatusController::class, 'listOrdersStatus'])->name('listOrdersStatus');
 Route::post('order_product_table_refresh_all', [HistoryCustomerOrderProductController::class, 'set_hc_order_product_table_refresh_all'])->name('set_hc_order_product_table_refresh_all');

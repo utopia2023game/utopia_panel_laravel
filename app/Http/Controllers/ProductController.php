@@ -442,7 +442,7 @@ class ProductController extends Controller
         return $products;
     }
 
-    public function listProductsCart(Request $request)
+    public function listCarts(Request $request)
     {
 
         $input = $request->all();

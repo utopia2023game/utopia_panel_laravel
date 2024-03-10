@@ -115,27 +115,31 @@ return new class extends Migration
         //     });
         // }
         // Schema::enableForeignKeyConstraints();
-        // if (Schema::hasTable('products')) {
         // Schema::table('products', function (Blueprint $table) {
         //     $table->renameColumn('visit', 'page_view');
         // });
-        // Schema::table('products', function (Blueprint $table) {
-        //     $table->Text('attributes_id')->nullable()->after('categories_id');
-        //     $table->Text('specification_id')->nullable()->after('attributes_id');
-        //     $table->Text('hashtag_id')->nullable()->after('specification_id');
-        //     $table->Text('model')->nullable()->after('title');
-        //     $table->double('weight')->change();
-        //     $table->double('width')->change();
-        //     $table->double('height')->change();
-        //     $table->double('length')->change();
-        //     $table->integer('page_view_unique')->default(0)->after('page_view');
-        //     $table->integer('page_view_avg_time')->default(0)->after('page_view_uniqe');
-        //     $table->integer('pay')->default(0)->after('page_view_avg_time');
-        //     $table->integer('process')->default(0)->after('pay');
-        //     $table->integer('delivery')->default(0)->after('process');
-        //     $table->integer('cancel')->default(0)->after('delivery');
-        //     $table->integer('return')->default(0)->after('cancel');
-        // });
+        // if (Schema::hasTable('carts')) {
+        //     Schema::table('carts', function (Blueprint $table) {
+        //         $table->double('sale_price')->default(0)->after('count_selected');
+        //         $table->double('discount_price')->default(0)->after('sale_price');
+        //     });
+        // }
+        // if (Schema::hasTable('next_carts')) {
+
+        //     Schema::table('next_carts', function (Blueprint $table) {
+        //         $table->dropColumn('created_at');
+        //         $table->dropColumn('updated_at');
+        //     });
+        //     Schema::table('next_carts', function (Blueprint $table) {
+        //         $table->boolean('status')->default(1)->after('id');
+        //         $table->foreignId('customer_id')->after('status')->constrained()->cascadeOnUpdate()->restrictOnDelete();
+        //         $table->foreignId('product_id')->after('customer_id')->constrained()->cascadeOnUpdate()->restrictOnDelete();
+        //         $table->integer('count_selected')->default(0)->after('product_id');
+        //         $table->double('sale_price')->default(0)->after('count_selected');
+        //         $table->double('discount_price')->default(0)->after('sale_price');
+        //         $table->timestampsTz();
+        //         $table->softDeletesTz();
+        //     });
         // }
     }
 
@@ -145,6 +149,12 @@ return new class extends Migration
     public function down(): void
     {
         // Schema::disableForeignKeyConstraints();
+
+        // if (Schema::hasTable('carts')) {
+        //     Schema::table('carts', function (Blueprint $table) {
+        //         $table->integer('count_selected')->nullable(false)->default(0)->change();
+        //     });
+        // }
 
         // if (Schema::hasTable('alarm_smart_offer_categories')) {
         //     Schema::table('alarm_smart_offer_categories', function (Blueprint $table) {
