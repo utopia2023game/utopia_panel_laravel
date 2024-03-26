@@ -66,8 +66,8 @@ Route::post('category_softdelete', [CategoryController::class, 'softdelete'])->n
 Route::post('category_forcedelete', [CategoryController::class, 'forcedelete'])->name('forcedelete');
 Route::post('category_restore', [CategoryController::class, 'restore'])->name('restore');
 Route::post('category_list', [CategoryController::class, 'listCategory'])->name('listCategory');
-Route::post('category_children_list_by_cat_id', [CategoryController::class, 'categoryChildrenListByCatId'])->name('categoryChildrenListByCatId');
 Route::post('category_add_remove_image', [CategoryController::class, 'categoryAddRemoveImage'])->name('categoryAddRemoveImage');
+Route::post('product_list_by_category_id', [CategoryController::class, 'productListByCategoryId'])->name('productListByCategoryId');
 
 Route::post('set_hc_category', [HistoryCustomerController::class, 'setHcCategory'])->name('setHcCategory');
 Route::post('set_hc_cart', [HistoryCustomerController::class, 'setHcCart'])->name('setHcCart');
@@ -91,10 +91,13 @@ Route::post('store_list', [StoreController::class, 'storeList'])->name('storeLis
 
 
 Route::post('list_next_carts', [NextCartController::class, 'listNextCarts'])->name('listNextCarts');
+Route::post('list_next_carts_by_ids', [NextCartController::class, 'listNextCartsByIds'])->name('listNextCartsByIds');
 Route::post('transfer_next_cart_to_cart_in_server', [NextCartController::class, 'transferNextCartToCartInServer'])->name('transferNextCartToCartInServer');
 Route::post('delete_next_cart_item_in_server', [NextCartController::class, 'deleteNextCartItemInServer'])->name('deleteNextCartItemInServer');
 
 Route::post('list_carts', [CartController::class, 'listCarts'])->name('listCarts');
+Route::post('list_carts_by_ids', [CartController::class, 'listCartsByIds'])->name('listCartsByIds');
+Route::post('clear_cart_by_customer_id', [CartController::class, 'clearCartByCustomerId'])->name('clearCartByCustomerId');
 Route::post('set_increment_decrement_cart', [CartController::class, 'setIncrementDecrementCartInServer'])->name('setIncrementDecrementCartInServer');
 Route::post('transfer_cart_to_next_cart_in_server', [CartController::class, 'transferCartToNextCartInServer'])->name('transferCartToNextCartInServer');
 
@@ -124,6 +127,7 @@ Route::post('address_force_delete', [AddressController::class, 'forcedelete'])->
 Route::post('address_restore', [AddressController::class, 'restore'])->name('restore');
 Route::post('set_priority_address', [AddressController::class, 'setPriorityAddress'])->name('setPriorityAddress');
 Route::post('confirm_address', [AddressController::class, 'confirmAddress'])->name('confirmAddress');
+
 Route::post('confirm_message', [MessageController::class, 'confirmMessage'])->name('confirmMessage');
 
 Route::post('set_birth_execute_list', [AlarmSmartExecuteController::class, 'setBirthExecuteList'])->name('setBirthExecuteList');

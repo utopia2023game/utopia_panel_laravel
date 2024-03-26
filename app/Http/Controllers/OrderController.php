@@ -86,6 +86,10 @@ class OrderController extends Controller
 
                                             // return $input;
                                             $order = Order::create($input);
+
+                                            try {
+                                                Helper::clearCartByCustomerId($input['customer_id']);
+                                            } catch (\Throwable $th) {}
                                         }
 
                                         $bank = Bank::where('id', $bid)->first() ?? '';
@@ -651,7 +655,7 @@ class OrderController extends Controller
             array_push($order_status_id, $order_status[$f]->id);
         }
 
-        $Order = Order::where('customer_id', $input['customer_id'])->whereIn('order_status_id', $order_status_id)->get();
+        $Order = Order::where('customer_id', $input['customer_id'])->whereIn('order_status_id', $order_status_id)->orderBy('id' , 'desc')->get();
 
         for ($i = 0; $i < count($Order); $i++) {
             $ids = json_decode($Order[$i]['product_id']);

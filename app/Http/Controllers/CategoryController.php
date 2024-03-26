@@ -192,7 +192,7 @@ class CategoryController extends Controller
         return $categories;
     }
 
-    public function categoryChildrenListByCatId(Request $request)
+    public function productListByCategoryId(Request $request)
     {
         $input = $request->all();
 

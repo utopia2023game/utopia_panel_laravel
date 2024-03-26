@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helper;
 use App\Models\Cart;
 use App\Models\Media;
-use App\Helpers\Helper;
-use App\Models\Product;
 use App\Models\NextCart;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class NextCartController extends Controller
@@ -36,10 +36,8 @@ class NextCartController extends Controller
         for ($i = 0; $i < count($ids); $i++) {
             $product = Product::find($ids[$i]);
 
-            Helper::updatingProductsPrice($product);
-            // echo 'product  => ' . empty($product) . "\n";
-
             if (!empty($product)) {
+                Helper::updatingProductsPrice($product);
 
                 $a = Media::where('product_id', $product['id'])->where('priority', 1)->where('type', 'image')->first();
                 if ($a == null) {
@@ -48,6 +46,44 @@ class NextCartController extends Controller
                 $product['thumbnail_image'] = $a == null ? "" : $a['path'];
 
                 $product['count_selected'] = $carts[$i]['count_selected'];
+                array_push($products, $product);
+
+            }
+        }
+        return $products;
+
+    }
+
+    public function listNextCartsByIds()
+    {
+
+        $input = Request()->all();
+
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
+
+        $ids = array();
+
+        $ids = json_decode($input['ids']);
+
+        // return $ids;
+
+        $products = array();
+
+        for ($i = 0; $i < count($ids); $i++) {
+            $product = Product::find($ids[$i]);
+
+            // echo 'product  => ' . empty($product) . "\n";
+
+            if (!empty($product)) {
+                Helper::updatingProductsPrice($product);
+
+                $a = Media::where('product_id', $product['id'])->where('priority', 1)->where('type', 'image')->first();
+                if ($a == null) {
+                    $a = Media::where('product_id', $product['id'])->where('type', 'image')->first();
+                }
+                $product['thumbnail_image'] = $a == null ? "" : $a['path'];
+
+                $product['count_selected'] = 0;
                 array_push($products, $product);
 
                 // $products[count($products)] = $product;

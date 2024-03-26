@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Models\Cart;
 use App\Models\Media;
 use App\Helpers\Helper;
 use App\Models\Comment;
@@ -369,13 +370,13 @@ class ProductController extends Controller
     }
 
 
-    public function ProductData(Request $request)
+    public function ProductData()
     {
-        $input = $request->all();
+        $input = Request()->all();
 
         Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
 
-        $product = Product::find($request->id);
+        $product = Product::find($input['product_id']);
 
         Helper::updatingProductsPrice($product);
 
@@ -394,12 +395,16 @@ class ProductController extends Controller
         }
         $product['categories_id'] = $a;
 
-        $product['files'] = Product::find($request->id)->getMedia;
+        $product['files'] = Product::find($input['product_id'])->getMedia;
 
         $product['comments_data'] = array();
-        $b['rate'] = Comment::where('product_id', $request->id)->where('status', 2)->avg('rate');
-        $b['comments'] = Comment::where('product_id', $request->id)->where('status', 2)->orderBy('created_at', 'desc')->get();
+        $b['rate'] = Comment::where('product_id', $input['product_id'])->where('status', 2)->avg('rate');
+        $b['comments'] = Comment::where('product_id', $input['product_id'])->where('status', 2)->orderBy('created_at', 'desc')->get();
         $product['comments_data'] = $b;
+        $product['count_selected'] = 0;
+        if(Cart::where('customer_id', $input['customer_id'])->where('product_id', $input['product_id'])->exists()){
+            $product['count_selected'] = Cart::where('customer_id', $input['customer_id'])->where('product_id', $input['product_id'])->get('count_selected')[0]['count_selected'];
+        }
 
 
         return $product;

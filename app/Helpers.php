@@ -2,15 +2,15 @@
 
 namespace App\Helpers;
 
-use PDO;
+use App\Models\Cart;
 use App\Models\Order;
-use App\Models\SmsLogon;
-use App\Models\Employees;
-use Hekmatinasser\Verta\Verta;
 use App\Models\SmsCustomerLogon;
+use App\Models\SmsLogon;
+use Hekmatinasser\Verta\Verta;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Config;
+use PDO;
 
 class Helper
 {
@@ -59,6 +59,15 @@ class Helper
     //     return $record->status;
     // }
 
+    public static function clearCartByCustomerId($customerId)
+    {
+        if (Cart::where('customer_id', $customerId)->exists()) {
+            Cart::where('customer_id', $customerId)->forcedelete();
+            return 1;
+        }
+        return 0;
+    }
+
     public static function DBConnection($dbName)
     {
         // if (env('APP_ENV') == 'local') {
@@ -98,10 +107,10 @@ class Helper
                     'options' => extension_loaded('pdo_mysql') ? array_filter([
                         PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
                     ]) : [],
-                )
+                ),
             );
             /* \DB::setDefaultConnection('myConnection');
-              $state = \DB::connection()->getPdo();*/
+            $state = \DB::connection()->getPdo();*/
 
             Config::set('database.connections.' . $dbName . '.database', $dbName);
             DB::setDefaultConnection($dbName);
@@ -112,7 +121,6 @@ class Helper
         }
         return $state;
     }
-
 
     public static function getDatabaseName()
     {
@@ -149,7 +157,6 @@ class Helper
         return $num4Digits;
     }
 
-
     public static function updatingProductsPrice($product)
     {
 
@@ -172,7 +179,7 @@ class Helper
         $a['discount_time_from'] = '';
         $a['discount_time_until'] = '';
 
-        if ($discount_time_from != '' && $discount_time_until != '') { // when between time from and time until  
+        if ($discount_time_from != '' && $discount_time_until != '') { // when between time from and time until
             try {
                 $DateNow = now()->toJalali();
 
@@ -181,7 +188,6 @@ class Helper
                 $DTFArray = json_decode($DTF);
                 $dateSpell = Verta::jalaliToGregorian($DTFArray[0], $DTFArray[1], $DTFArray[2]);
                 $TimeFrom = $dateSpell != null ? $dateSpell[0] . '-' . $dateSpell[1] . '-' . $dateSpell[2] : '';
-
 
                 $DTU = str_replace('/0', '/', $discount_time_until);
                 $DTU = '[' . str_replace('/', ',', $DTU) . ']';
@@ -200,7 +206,7 @@ class Helper
 
                 // echo 'productID  ' . $product->id . '  diffHoursTimeUntil ' . $diffHoursDateNowTimeUntil . "\n";
 
-                if ($diffHoursDateNowTimeUntil >= 24) { //  when time now passed from time until means discount systematic is timeout and update to default 
+                if ($diffHoursDateNowTimeUntil >= 24) { //  when time now passed from time until means discount systematic is timeout and update to default
                     // echo 'productID  ' . $product->id . " diffHoursDateNowTimeUntil  \n";
                     $product->update($a);
                 } else {
@@ -216,7 +222,6 @@ class Helper
                         }
                     }
                 }
-
 
             } catch (\Throwable $th) {
                 $product->update($a);
@@ -262,7 +267,6 @@ class Helper
                 $product->update($a);
             }
 
-
         } else if ($discount_time_from != '' && $discount_time_until == '') {
             try {
                 $DateNow = now()->toJalali();
@@ -297,9 +301,7 @@ class Helper
                 $product->update($a);
             }
 
-
         }
-
 
     }
     public static function updateProductConfirmDiscount($product)
@@ -343,7 +345,6 @@ class Helper
             return $discountPrice;
         }
     }
-
 
     public static function generateUniqueCode()
     {
