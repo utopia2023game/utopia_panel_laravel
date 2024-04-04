@@ -40,7 +40,16 @@ class CartController extends Controller
             // echo 'product  => ' . empty($product) . "\n";
 
             if (!empty($product)) {
-                Helper::updatingProductsPrice($product);
+                $result_time = Helper::updatingProductsPrice($product);
+
+                if (!$result_time) {
+                    $product['confirm_discount'] = 0;
+                    $product['discount_percent'] = 0;
+                    $product['discount_manual'] = 0;
+                    $product['discount_price'] = 0;
+                    $product['discount_time_from'] = '';
+                    $product['discount_time_until'] = '';
+                }
 
                 $a = Media::where('product_id', $product['id'])->where('priority', 1)->where('type', 'image')->first();
                 if ($a == null) {
@@ -49,7 +58,12 @@ class CartController extends Controller
                 $product['thumbnail_image'] = $a == null ? "" : $a['path'];
 
                 $product['count_selected'] = $carts[$i]['count_selected'];
-                array_push($products, $product);
+
+                if ($product->stack_status != 0 || $product->stack_status == 0 && $product->stack_count <= 0) {
+                    $this->dataCartToNextCart($product['id'], $customer_id, $carts[$i]);
+                } else {
+                    array_push($products, $product);
+                }
             }
         }
         return $products;
@@ -76,7 +90,16 @@ class CartController extends Controller
 
             if (!empty($product)) {
 
-                Helper::updatingProductsPrice($product);
+                $result_time = Helper::updatingProductsPrice($product);
+
+                if (!$result_time) {
+                    $product['confirm_discount'] = 0;
+                    $product['discount_percent'] = 0;
+                    $product['discount_manual'] = 0;
+                    $product['discount_price'] = 0;
+                    $product['discount_time_from'] = '';
+                    $product['discount_time_until'] = '';
+                }
                 $a = Media::where('product_id', $product['id'])->where('priority', 1)->where('type', 'image')->first();
                 if ($a == null) {
                     $a = Media::where('product_id', $product['id'])->where('type', 'image')->first();
@@ -84,11 +107,26 @@ class CartController extends Controller
                 $product['thumbnail_image'] = $a == null ? "" : $a['path'];
 
                 $product['count_selected'] = 0;
+
                 array_push($products, $product);
             }
         }
         return $products;
 
+    }
+
+    public function dataCartToNextCart($product_id, $customer_id, $cart)
+    {
+        if (!NextCart::where('customer_id', $customer_id)->where('product_id', $product_id)->exists()) {
+            try {
+                NextCart::create($cart);
+                Cart::where('customer_id', $customer_id)->where('product_id', $product_id)->forcedelete();
+            } catch (\Throwable $th) {}
+        } else {
+            try {
+                $cart->forcedelete();
+            } catch (\Throwable $th) {}
+        }
     }
 
     public function clearCartByCustomerId()
@@ -122,22 +160,70 @@ class CartController extends Controller
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $idb);
 
-        if(!Product::where('id' , $data['product_id'])->exists()) return 0;
-        $product = Product::where('id' , $data['product_id'])->first()->toArray();
+        if (!Product::where('id', $data['product_id'])->exists()) {
+            return 0;
+        }
+
+        $product = Product::where('id', $data['product_id'])->first()->toArray();
 
         // dd($product['stack_status'] ,$product['stack_limit'] ?? $product['stack_count']);
 
-        if($product['stack_status'] != 0) return 0;
+        if ($product['stack_status'] != 0 || $product['stack_status'] == 0 && $product['stack_count'] <= 0) {
+            return 20; // means refresh
+        }
+
+        $stack_count = $product['stack_count'] ?? 0;
         $count_selected_limit = $product['stack_limit'] ?? $product['stack_count'] ?? 0;
 
-        if($count_selected_limit == 0) return 0;
+        if ($stack_count == 0 && $count_selected_limit == 0) {
+            return 10;
+        }
 
         // dd($count_selected_limit);
 
         if (Cart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'])->exists()) {
             $cart = Cart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'])->first();
 
-            if($count_selected_limit <= $cart->count_selected) return 0;
+            if ($data['increment_decrement'] > 0 && $stack_count <= $cart->count_selected || $data['increment_decrement'] > 0 && $count_selected_limit <= $cart->count_selected) {
+                return 30;
+            }
+
+            if ($cart->count_selected > 1 && $data['increment_decrement'] <= 0 && $stack_count <= $cart->count_selected && abs($stack_count - $cart->count_selected) > 2) {
+
+                unset($data['increment_decrement']);
+                $data['count_selected'] = $stack_count;
+                try {
+                    if ($stack_count == 0) {
+                        $cart->forcedelete();
+                    } else {
+                        $cart->update($data);
+                    }
+
+                    return 40;
+                } catch (\Throwable $th) {
+                    return 50;
+                }
+
+            }
+
+            // if ($cart->count_selected > 1 && $data['increment_decrement'] <= 0 && $count_selected_limit <= $cart->count_selected && abs($stack_count - $cart->count_selected) > 2) {
+
+            //     unset($data['increment_decrement']);
+            //     $data['count_selected'] = $count_selected_limit;
+            //     try {
+            //         if ($stack_count == 0) {
+            //             $cart->forcedelete();
+            //         } else {
+            //             $cart->update($data);
+            //         }
+
+            //         return 70;
+            //     } catch (\Throwable $th) {
+            //         return 80;
+            //     }
+
+            // }
+
             $data['count_selected'] = $cart->count_selected + $data['increment_decrement'];
 
             if ($data['count_selected'] > 0) {
@@ -178,7 +264,6 @@ class CartController extends Controller
         return 0;
     }
 
-
     public function transferCartLogoutToCartLogin()
     {
 
@@ -186,68 +271,129 @@ class CartController extends Controller
 
         $idb = $input['idb'];
         $data = array();
-        $data['customer_id'] = $input['customer_id'];
-        $data['product_id'] = $input['product_id'];
-        $data['increment_decrement'] = $input['increment_decrement'];
-        $data['sale_price'] = $input['sale_price'];
-        $data['discount_price'] = $input['discount_price'];
+        $data['customer_id'] = intval($input['customer_id']);
+
+        try {
+            $data['product_id'] = json_decode($input['product_id']);
+            $array_count = count($data['product_id']);
+            $data['count_selected'] = json_decode($input['count_selected']);
+            $data['sale_price'] = json_decode($input['sale_price']);
+            $data['discount_price'] = json_decode($input['discount_price']);
+        } catch (\Throwable $th) {
+            return 0;
+        }
+
+        if (count($data['count_selected']) != $array_count || count($data['sale_price']) != $array_count || count($data['discount_price']) != $array_count) {
+            return 0;
+        }
 
         Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $idb);
 
-        if(!Product::where('id' , $data['product_id'])->exists()) return 0;
-        $product = Product::where('id' , $data['product_id'])->first()->toArray();
+        for ($i = 0; $i < $array_count; $i++) {
 
-        // dd($product['stack_status'] ,$product['stack_limit'] ?? $product['stack_count']);
-
-        if($product['stack_status'] != 0) return 0;
-        $count_selected_limit = $product['stack_limit'] ?? $product['stack_count'] ?? 0;
-
-        if($count_selected_limit == 0) return 0;
-
-        // dd($count_selected_limit);
-
-        if (Cart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'])->exists()) {
-            $cart = Cart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'])->first();
-
-            if($count_selected_limit <= $cart->count_selected) return 0;
-            $data['count_selected'] = $cart->count_selected + $data['increment_decrement'];
-
-            if ($data['count_selected'] > 0) {
-                unset($data['increment_decrement']);
-
-                try {
-                    $cart->update($data);
-                    return 1;
-                } catch (\Throwable $th) {
-                    return 0;
-                }
-            } else {
-                $cart->forcedelete();
-                return 1;
+            if (!Product::where('id', $data['product_id'][$i])->exists()) {
+                continue;
             }
 
-        } else {
-            if ($data['increment_decrement'] == 1) {
-                try {
-                    if (NextCart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'])->exists()) {
-                        NextCart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'])->forcedelete();
-                    }
-                } catch (\Throwable $th) {
-                    //throw $th;
+            $product = Product::where('id', $data['product_id'][$i])->first()->toArray();
+
+            if ($product['stack_status'] != 0) {
+                continue;
+            }
+
+            $stack_count = $product['stack_count'] ?? 0;
+            $count_selected_limit = $product['stack_limit'] ?? $product['stack_count'] ?? 0;
+
+            if ($count_selected_limit == 0) {
+                continue;
+            }
+
+            // dd($data['customer_id'] , $data['product_id'][$i]);
+
+            if ($stack_count > 0) {
+                if (NextCart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'][$i])->exists()) {
+                    continue;
                 }
 
-                try {
-                    $data['count_selected'] = 1;
-                    unset($data['increment_decrement']);
-                    Cart::create($data);
-                    return 1;
-                } catch (\Throwable $th) {
-                    return 0;
+                if (Cart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'][$i])->exists()) {
+                    $cart = Cart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'][$i])->first();
+
+                    if ($cart->count_selected + $data['count_selected'][$i] > $count_selected_limit) {
+                        $data['count_selected'][$i] = $count_selected_limit;
+                    } else {
+                        $data['count_selected'][$i] = $cart->count_selected + $data['count_selected'][$i];
+                    }
+
+                    try {
+                        $a = array();
+                        $a['customer_id'] = $data['customer_id'];
+                        $a['product_id'] = $data['product_id'][$i];
+                        $a['count_selected'] = $data['count_selected'][$i];
+                        $cart->update($a);
+                        continue;
+                    } catch (\Throwable $th) {
+                        continue;
+                    }
+
+                } else {
+
+                    if ($data['count_selected'][$i] > $count_selected_limit) {
+                        $data['count_selected'][$i] = $count_selected_limit;
+                    }
+
+                    try {
+                        $a = array();
+                        $a['customer_id'] = $data['customer_id'];
+                        $a['product_id'] = $data['product_id'][$i];
+                        $a['count_selected'] = $data['count_selected'][$i];
+                        $a['sale_price'] = $data['sale_price'][$i];
+                        $a['discount_price'] = $data['discount_price'][$i];
+                        Cart::create($a);
+                        continue;
+                    } catch (\Throwable $th) {
+                        continue;
+                    }
+                }
+            } else {
+                if (Cart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'][$i])->exists()) {
+                    continue;
+                }
+                if (!NextCart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'][$i])->exists()) {
+                    try {
+                        $a = array();
+                        $a['customer_id'] = $data['customer_id'];
+                        $a['product_id'] = $data['product_id'][$i];
+                        $a['count_selected'] = $data['count_selected'][$i];
+                        $a['sale_price'] = $data['sale_price'][$i];
+                        $a['discount_price'] = $data['discount_price'][$i];
+                        NextCart::create($a);
+                        continue;
+                    } catch (\Throwable $th) {
+                        continue;
+                    }
+                } else {
+                    $next_cart = NextCart::where('customer_id', $data['customer_id'])->where('product_id', $data['product_id'][$i])->first();
+
+                    if ($next_cart->count_selected + $data['count_selected'][$i] > $count_selected_limit) {
+                        $data['count_selected'][$i] = $count_selected_limit;
+                    } else {
+                        $data['count_selected'][$i] = $next_cart->count_selected + $data['count_selected'][$i];
+                    }
+
+                    try {
+                        $a = array();
+                        $a['customer_id'] = $data['customer_id'];
+                        $a['product_id'] = $data['product_id'][$i];
+                        $a['count_selected'] = $data['count_selected'][$i];
+                        $next_cart->update($a);
+                        continue;
+                    } catch (\Throwable $th) {
+                        continue;
+                    }
                 }
             }
         }
-
-        return 0;
+        return 1;
     }
 
     public function transferCartToNextCartInServer()

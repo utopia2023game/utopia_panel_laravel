@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
-use App\Models\Cart;
-use App\Models\Media;
 use App\Helpers\Helper;
-use App\Models\Comment;
-use App\Models\Product;
+use App\Models\Cart;
 use App\Models\Category;
+use App\Models\Comment;
+use App\Models\Media;
+use App\Models\Product;
+use Exception;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -19,7 +19,7 @@ class ProductController extends Controller
 
         // return $input;
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $data = array();
 
@@ -55,7 +55,6 @@ class ProductController extends Controller
             return ($e->getMessage());
         }
 
-
         // return '$product_create';
         $product_id = $product_create->id;
         // $product_id = 35 ;
@@ -64,7 +63,6 @@ class ProductController extends Controller
         // dd($images);
 
         $videos = $input['videos'] == "[]" ? [] : $input['videos'];
-
 
         // return $videos ;
         if (count($images) <= 6) {
@@ -119,7 +117,7 @@ class ProductController extends Controller
         $input = $request->all();
         $product_id = $input['id'];
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $data = array();
 
@@ -155,13 +153,10 @@ class ProductController extends Controller
             return ($e->getMessage());
         }
 
-
         // return $product_update . "\n";
         // $product_id = 35 ;
 
         if ($product_update > 0) {
-
-
 
             $images = $input['images'] == "[]" ? [] : $input['images'];
             // dd($images);
@@ -199,7 +194,6 @@ class ProductController extends Controller
         }
         // return $result;
     }
-
 
     public function uploadUpdateFiles($files, $type, $product_id, $idb)
     {
@@ -291,7 +285,6 @@ class ProductController extends Controller
             foreach ($files as $file) {
                 if (!empty($file['detail'])) {
 
-
                     $file_name = rand(1000, 9999) . '_' . $file['detail']->getClientOriginalName();
                     // $destinationPath = 'uploads/' . $type . '/' . $file_name;
                     $destinationPath = 'uploads/' . $idb . '/' . $type . '/';
@@ -302,9 +295,7 @@ class ProductController extends Controller
                     $data['type'] = $type;
                     $data['path'] = $destinationPath . $file_name;
 
-
                     Media::create($data);
-
 
                     $result_number++;
                 }
@@ -314,13 +305,12 @@ class ProductController extends Controller
         return $result_number;
     }
 
-
     public function restore(Request $request)
     {
 
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
         // $request->validate([
         //     'id' => 'nullable|numeric'
         // ]);
@@ -334,7 +324,7 @@ class ProductController extends Controller
 
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
         // $request->validate([
         //     'id' => 'nullable|numeric'
         // ]);
@@ -352,7 +342,7 @@ class ProductController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         // $request->validate([
         //     'id' => 'nullable|numeric'
@@ -369,18 +359,27 @@ class ProductController extends Controller
 
     }
 
-
     public function ProductData()
     {
         $input = Request()->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
+        // $product = Product::where('id', $input['product_id'])->get();
         $product = Product::find($input['product_id']);
 
-        Helper::updatingProductsPrice($product);
+        // dd($input['product_id'] ,$product);
 
-        // return 'end';
+        $result_time = Helper::updatingProductsPrice($product);
+
+        if (!$result_time) {
+            $product['confirm_discount'] = 0;
+            $product['discount_percent'] = 0;
+            $product['discount_manual'] = 0;
+            $product['discount_price'] = 0;
+            $product['discount_time_from'] = '';
+            $product['discount_time_until'] = '';
+        }
 
         $categories = json_decode($product->categories_id);
         $a = array();
@@ -402,10 +401,9 @@ class ProductController extends Controller
         $b['comments'] = Comment::where('product_id', $input['product_id'])->where('status', 2)->orderBy('created_at', 'desc')->get();
         $product['comments_data'] = $b;
         $product['count_selected'] = 0;
-        if(Cart::where('customer_id', $input['customer_id'])->where('product_id', $input['product_id'])->exists()){
+        if (Cart::where('customer_id', $input['customer_id'])->where('product_id', $input['product_id'])->exists()) {
             $product['count_selected'] = Cart::where('customer_id', $input['customer_id'])->where('product_id', $input['product_id'])->get('count_selected')[0]['count_selected'];
         }
-
 
         return $product;
     }
@@ -429,20 +427,29 @@ class ProductController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $products = Product::orderBy('id', 'DESC')->get();
 
         for ($i = 0; $i < count($products); $i++) {
-            Helper::updatingProductsPrice($products[$i]);
-            
+            $result_time = Helper::updatingProductsPrice($products[$i]);
+
+            if (!$result_time) {
+                $products[$i]['confirm_discount'] = 0;
+                $products[$i]['discount_percent'] = 0;
+                $products[$i]['discount_manual'] = 0;
+                $products[$i]['discount_price'] = 0;
+                $products[$i]['discount_time_from'] = '';
+                $products[$i]['discount_time_until'] = '';
+            }
+            // $i == 0 ? Helper::updatingProductsPrice($products[$i]) : null;
+
             $a = Media::where('product_id', $products[$i]['id'])->where('priority', 1)->where('type', 'image')->first();
             if ($a == null) {
                 $a = Media::where('product_id', $products[$i]['id'])->where('type', 'image')->first();
             }
             $products[$i]['thumbnail_image'] = $a == null ? "" : $a['path'];
         }
-
 
         return $products;
     }
@@ -454,14 +461,23 @@ class ProductController extends Controller
 
         $ids = json_decode($input['id']);
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $products = array();
 
         for ($i = 0; $i < count($ids); $i++) {
             $product = Product::find($ids[$i]);
 
-            Helper::updatingProductsPrice($product);
+            $result_time = Helper::updatingProductsPrice($product);
+
+            if (!$result_time) {
+                $product['confirm_discount'] = 0;
+                $product['discount_percent'] = 0;
+                $product['discount_manual'] = 0;
+                $product['discount_price'] = 0;
+                $product['discount_time_from'] = '';
+                $product['discount_time_until'] = '';
+            }
             // echo 'product  => ' . empty($product) . "\n";
 
             if (!empty($product)) {
@@ -483,12 +499,12 @@ class ProductController extends Controller
     {
         $input = $request->all();
 
-        Helper::DBConnection(env('SERVER_STATUS' , '') . 'utopia_store_' . $input['idb']);
+        Helper::DBConnection(env('SERVER_STATUS', '') . 'utopia_store_' . $input['idb']);
 
         $product = Product::find($input['id']);
 
         $product = $product->update([
-            'page_view' => ($product->page_view) + 1
+            'page_view' => ($product->page_view) + 1,
         ]);
 
         return $product;
@@ -500,10 +516,9 @@ class ProductController extends Controller
     //     $txtSearch = $request->input('q');
     //     if(isset($txtSearch)){
     //        $query = Post::where('title', 'LIKE', "%$txtSearch%")->orderBy('id', 'DESC');
-    //     }else{       
+    //     }else{
 
     //     $query = Post::orderBy('id', 'DESC');
-
 
     //       if ($request->has('cate')) {
     //         $categoryType = $request->input('cate');

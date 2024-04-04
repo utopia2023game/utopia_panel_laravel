@@ -89,17 +89,19 @@ Route::post('login_overview_with_password', [Controller::class, 'loginMobileOver
 
 Route::post('store_list', [StoreController::class, 'storeList'])->name('storeList');
 
-
-Route::post('list_next_carts', [NextCartController::class, 'listNextCarts'])->name('listNextCarts');
-Route::post('list_next_carts_by_ids', [NextCartController::class, 'listNextCartsByIds'])->name('listNextCartsByIds');
-Route::post('transfer_next_cart_to_cart_in_server', [NextCartController::class, 'transferNextCartToCartInServer'])->name('transferNextCartToCartInServer');
-Route::post('delete_next_cart_item_in_server', [NextCartController::class, 'deleteNextCartItemInServer'])->name('deleteNextCartItemInServer');
-
 Route::post('list_carts', [CartController::class, 'listCarts'])->name('listCarts');
 Route::post('list_carts_by_ids', [CartController::class, 'listCartsByIds'])->name('listCartsByIds');
 Route::post('clear_cart_by_customer_id', [CartController::class, 'clearCartByCustomerId'])->name('clearCartByCustomerId');
 Route::post('set_increment_decrement_cart', [CartController::class, 'setIncrementDecrementCartInServer'])->name('setIncrementDecrementCartInServer');
 Route::post('transfer_cart_to_next_cart_in_server', [CartController::class, 'transferCartToNextCartInServer'])->name('transferCartToNextCartInServer');
+Route::post('transfer_cart_logout_to_cart_login', [CartController::class, 'transferCartLogoutToCartLogin'])->name('transferCartLogoutToCartLogin');
+
+Route::post('list_next_carts', [NextCartController::class, 'listNextCarts'])->name('listNextCarts');
+Route::post('list_next_carts_by_ids', [NextCartController::class, 'listNextCartsByIds'])->name('listNextCartsByIds');
+Route::post('transfer_next_cart_to_cart_in_server', [NextCartController::class, 'transferNextCartToCartInServer'])->name('transferNextCartToCartInServer');
+Route::post('transfer_next_cart_logout_to_next_cart_login', [NextCartController::class, 'transferNextCartLogoutToNextCartLogin'])->name('transferNextCartLogoutToNextCartLogin');
+Route::post('delete_next_cart_item_in_server', [NextCartController::class, 'deleteNextCartItemInServer'])->name('deleteNextCartItemInServer');
+
 
 Route::post('list_order_status', [OrderStatusController::class, 'listOrdersStatus'])->name('listOrdersStatus');
 Route::post('order_product_table_refresh_all', [HistoryCustomerOrderProductController::class, 'set_hc_order_product_table_refresh_all'])->name('set_hc_order_product_table_refresh_all');

@@ -264,7 +264,16 @@ class CategoryController extends Controller
 
         $items[2] = array();
         for ($i = 0; $i < count($products); $i++) {
-            Helper::updatingProductsPrice($products[$i]);
+            $result_time = Helper::updatingProductsPrice($products[$i]);
+
+            if (!$result_time) {
+                $products[$i]['confirm_discount'] = 0;
+                $products[$i]['discount_percent'] = 0;
+                $products[$i]['discount_manual'] = 0;
+                $products[$i]['discount_price'] = 0;
+                $products[$i]['discount_time_from'] = '';
+                $products[$i]['discount_time_until'] = '';
+            }
             // echo $products[$j];
             $categories_id = json_decode($products[$i]->categories_id);
             for ($j = 0; $j < count($categories_id); $j++) {

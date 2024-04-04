@@ -3,15 +3,23 @@
 namespace App\Http\Controllers;
 
 use PDO;
+use App\Models\Bank;
 use App\Models\User;
 use App\Models\Store;
 use App\Models\Mobile;
 use App\Helpers\Helper;
+use App\Models\Delivery;
 use App\Models\SmsLogon;
+use App\Models\AlarmStatus;
+use App\Models\OrderStatus;
+use App\Models\StackStatus;
 use Illuminate\Http\Request;
 use App\Models\CategoryStore;
+use App\Models\DiscountStatus;
+use App\Models\AlarmSmartCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -209,6 +217,8 @@ class Controller extends BaseController
                 'accessibility' => 'boss',
             ]);
 
+            $this->transferDataFromMangmentToCustomer(env('SERVER_STATUS' , '') . 'utopia_store_' . $dbName);
+
             return 1;
         } else {
             return 0;
@@ -247,6 +257,89 @@ class Controller extends BaseController
                 }
             }
         }
+    }
+
+    public function transferDataFromMangmentToCustomer($dbName)
+    {
+        // dd($request);
+        Helper::DBConnection(env('SERVER_STATUS', '') . '0_utopia_management');
+
+        $alarmSmartCategory = AlarmSmartCategory::get()->toArray();
+        $alarmStatus = AlarmStatus::get()->toArray();
+        $bank = Bank::get()->toArray();
+        $delivery = Delivery::get()->toArray();
+        $discountStatus = DiscountStatus::get()->toArray();
+        $orderStatus = OrderStatus::get()->toArray();
+        $stackStatus = StackStatus::get()->toArray();
+
+        // dd($alarmSmartCategory, $alarmStatus, $bank, $delivery, $discountStatus, $orderStatus, $stackStatus);
+
+        Helper::DBConnection($dbName);
+
+        Schema::disableForeignKeyConstraints();
+
+        try {
+            // dd($alarmSmartCategory , gettype($alarmSmartCategory));
+
+            AlarmSmartCategory::truncate();
+            for ($i = 0; $i < count($alarmSmartCategory); $i++) {
+                AlarmSmartCategory::create($alarmSmartCategory[$i]);
+            }
+
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        try {
+            AlarmStatus::truncate();
+            for ($i = 0; $i < count($alarmStatus); $i++) {
+                AlarmStatus::create($alarmStatus[$i]);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        try {
+            Bank::truncate();
+            for ($i = 0; $i < count($bank); $i++) {
+                Bank::create($bank[$i]);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        try {
+            Delivery::truncate();
+            for ($i = 0; $i < count($delivery); $i++) {
+                Delivery::create($delivery[$i]);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        try {
+            DiscountStatus::truncate();
+            for ($i = 0; $i < count($discountStatus); $i++) {
+                DiscountStatus::create($discountStatus[$i]);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        try {
+            OrderStatus::truncate();
+            for ($i = 0; $i < count($orderStatus); $i++) {
+                OrderStatus::create($orderStatus[$i]);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        try {
+            StackStatus::truncate();
+            for ($i = 0; $i < count($stackStatus); $i++) {
+                StackStatus::create($stackStatus[$i]);
+            }
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+        Schema::enableForeignKeyConstraints();
+
     }
 
     public function migrateByDataBaseName(Request $request)

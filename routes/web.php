@@ -5,15 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\ControllersManagement\Controller as ControllersManagementController;
 
-
-
-
-
-
-
-
-
+Route::get('/migrate_management_by_database_name', [ControllersManagementController::class, 'migrateManagementByDataBaseName'])->name('migrateManagementByDataBaseName');
+Route::get('/transfer_data_from_mangment_to_customer', [ControllersManagementController::class, 'transferDataFromMangmentToCustomer'])->name('transferDataFromMangmentToCustomer');
 
 Route::get('/rollback_by_database_name', [Controller::class, 'rollBackByDataBaseName'])->name('rollBackByDataBaseName');
 Route::get('/migrate_by_database_name', [Controller::class, 'migrateByDataBaseName'])->name('migrateByDataBaseName');

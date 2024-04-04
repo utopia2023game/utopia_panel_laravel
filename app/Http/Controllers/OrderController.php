@@ -477,12 +477,14 @@ class OrderController extends Controller
         $discount_time_until = $product->discount_time_until == null || $product->discount_time_until == '' ? '' : $product->discount_time_until;
 
         $updateProductDiscountTimeSystematic = $this->updateProductDiscountTimeSystematic($product, $discount_time_from, $discount_time_until);
+        // $updateProductDiscountTimeSystematic = Helper::updateProductDiscountTimeSystematic($product, $discount_time_from, $discount_time_until);
         if ($updateProductDiscountTimeSystematic['result']) {
-            $discount_percent = $product->discount_percent == null || $product->discount_percent == '' ? 0 : $product->discount_percent;
-            $discount_manual = $product->discount_manual == null || $product->discount_manual == '' ? 0 : $product->discount_manual;
-            $discount_price = $product->discount_price == null || $product->discount_price == '' ? 0 : $product->discount_price;
+            // $discount_percent = $product->discount_percent == null || $product->discount_percent == '' ? 0 : $product->discount_percent;
+            // $discount_manual = $product->discount_manual == null || $product->discount_manual == '' ? 0 : $product->discount_manual;
+            // $discount_price = $product->discount_price == null || $product->discount_price == '' ? 0 : $product->discount_price;
 
-            $this->updateProductConfirmDiscount($product, $discount_percent, $discount_manual, $discount_price);
+            // $this->updateProductConfirmDiscount($product, $discount_percent, $discount_manual, $discount_price);
+            Helper::updateProductConfirmDiscount($product);
 
             $confirm_discount = $product->confirm_discount == null || $product->confirm_discount == '' ? 0 : $product->confirm_discount;
 
@@ -560,7 +562,7 @@ class OrderController extends Controller
             } else if ($discount_time_from == '' && $discount_time_until == '') {
                 // echo 'productID  ' . $product->id .'  discount_price ' . "\n";
                 $b = array();
-                $b['discount_price'] = 0;
+                // $b['discount_price'] = 0;
                 $b['discount_time_from'] = '';
                 $b['discount_time_until'] = '';
                 $product->update($b);
@@ -618,20 +620,22 @@ class OrderController extends Controller
 
         return $result;
     }
-    public function updateProductConfirmDiscount($product, $discount_percent, $discount_manual, $discount_price)
-    {
-        if ($discount_percent == 0 && $discount_manual == 0 || $discount_percent > 0 && $discount_manual > 0 || $discount_price == 0 && $discount_percent > 0 || $discount_price == 0 && $discount_manual > 0) {
-            $a = array();
-            $a['confirm_discount'] = 0;
-            $a['discount_percent'] = 0;
-            $a['discount_manual'] = 0;
-            $a['discount_price'] = 0;
-            $a['discount_time_from'] = '';
-            $a['discount_time_until'] = '';
+    
+    
+    // public function updateProductConfirmDiscount($product, $discount_percent, $discount_manual, $discount_price)
+    // {
+    //     if ($discount_percent == 0 && $discount_manual == 0 || $discount_percent > 0 && $discount_manual > 0 || $discount_price == 0 && $discount_percent > 0 || $discount_price == 0 && $discount_manual > 0) {
+    //         $a = array();
+    //         $a['confirm_discount'] = 0;
+    //         $a['discount_percent'] = 0;
+    //         $a['discount_manual'] = 0;
+    //         $a['discount_price'] = 0;
+    //         $a['discount_time_from'] = '';
+    //         $a['discount_time_until'] = '';
 
-            $product->update($a);
-        }
-    }
+    //         $product->update($a);
+    //     }
+    // }
 
     public function set_hc_order_product_table_refresh($customer_id, $product_id, $order_id)
     {
