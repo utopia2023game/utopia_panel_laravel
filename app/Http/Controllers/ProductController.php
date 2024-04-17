@@ -96,6 +96,7 @@ class ProductController extends Controller
     {
         $result_number = 0;
         foreach ($files as $file) {
+            // gettype($file);
             $file_name = rand(1000, 9999) . '_' . $file['detail']->getClientOriginalName();
             // $destinationPath = 'uploads/' . $type . '/' . $file_name;
             $destinationPath = 'uploads/' . $idb . '/' . $type . '/';
@@ -150,7 +151,8 @@ class ProductController extends Controller
         try {
             $product_update = Product::where('id', $product_id)->update($data);
         } catch (Exception $e) {
-            return ($e->getMessage());
+            return 0;
+            // return ($e->getMessage());
         }
 
         // return $product_update . "\n";
@@ -159,24 +161,33 @@ class ProductController extends Controller
         if ($product_update > 0) {
 
             $images = $input['images'] == "[]" ? [] : $input['images'];
-            // dd($images);
+            // return ($images);
 
             $videos = $input['videos'] == "[]" ? [] : $input['videos'];
             // dd($videos);
 
             // return $videos ;
-            if (count($images) <= 6) {
-                $result_images = $this->uploadUpdateFiles($images, 'image', $product_id, $input['idb']);
-            } else {
-                return 0;
+            try {
+                if (count($images) <= 6) {
+                    $result_images = $this->uploadUpdateFiles($images, 'image', $product_id, $input['idb']);
+                } else {
+                    return 0;
+                }
+            } catch (\Throwable $th) {
+                // return 0;
+                return $th;
             }
             // return $videos ;
-            if (count($videos) <= 2) {
-                $result_videos = $this->uploadUpdateFiles($videos, 'video', $product_id, $input['idb']);
-            } else {
-                return 0;
+            try {
+                if (count($videos) <= 2) {
+                    $result_videos = $this->uploadUpdateFiles($videos, 'video', $product_id, $input['idb']);
+                } else {
+                    return 0;
+                }
+            } catch (\Throwable $th) {
+                // return 0;
+                return $th;
             }
-
             // return $result_videos . ' ' . $result_images;
             if ($result_images == count($images) && $result_videos == count($videos)) {
                 return 1;
@@ -199,12 +210,13 @@ class ProductController extends Controller
     {
         $mediaTable = Media::where('product_id', $product_id)->where('type', $type);
 
-        // echo $mediaTable->get()[0]['id'] ;
         $mediaData = $mediaTable->get()->toArray();
         $mediaDataTemp = $mediaTable->get()->toArray();
-        // dd($files , $mediaDataTemp);
+
+        $filesTemp = $files;
         $result_number = 0;
 
+        // echo 'mediaDataTemp1 ' . count($mediaDataTemp) . '   ';
         if (count($mediaData) > 0 && count($files) != 0) {
             for ($i = 0; $i < count($mediaData); $i++) {
                 // echo 'type => ' . $type . ' / mediaData id => ' . $mediaData[$i]['id'] . "\n";
@@ -212,20 +224,12 @@ class ProductController extends Controller
                     // echo 'type => ' . $type . ' / files id => ' . $files[$j]['id'] . "\n";
                     if (strval($mediaData[$i]['id']) == strval($files[$j]['id'])) {
                         // echo 'type => ' . $type . ' / status true by id => ' . $files[$j]['id'] . "\n";
-                        if (!empty($files[$j]['detail'])) {
+                        if ($files[$j]['detail'] != null && !empty($files[$j]['detail'])) {
 
-                            try {
-                                $media = $mediaTable->where('id', $files[$j]['id'])->first();
-                                $media_path = $media['path'] == null ? '' : $media['path'];
-                                if ($media_path != '' && file_exists(public_path($media_path))) {
-                                    unlink(public_path($media_path));
-                                }
-                            } catch (Exception $e) {
-                                array_splice($mediaDataTemp, $i, 1); // array remove at
-                                array_splice($files, $j, 1); // array remove at
-                                $result_number++;
-                                break;
-                                // return ($e->getMessage());
+                            $media = $mediaTable->where('id', $files[$j]['id'])->first();
+                            $media_path = $media['path'] == null ? '' : $media['path'];
+                            if ($media_path != '' && file_exists(public_path($media_path))) {
+                                unlink(public_path($media_path));
                             }
 
                             $file_name = rand(1000, 9999) . '_' . $files[$j]['detail']->getClientOriginalName();
@@ -237,26 +241,26 @@ class ProductController extends Controller
                             $data['priority'] = $files[$j]['priority'];
                             $data['type'] = $type;
                             $data['path'] = $destinationPath . $file_name;
-                            $res = $media->update($data);
-                            if ($res > 0) {
-                                array_splice($mediaDataTemp, $i, 1); // array remove at
-                                array_splice($files, $j, 1); // array remove at
-                                $result_number++;
-                                break;
-                            }
-
-                        } else {
-                            array_splice($mediaDataTemp, $i, 1); // array remove at
-                            array_splice($files, $j, 1); // array remove at
-                            $result_number++;
-                            break;
+                            Media::where('product_id', $product_id)->where('type', $type)->where('id', $files[$j]['id'])->update($data);
                         }
+                        if (strval($mediaData[$i]['priority']) != strval($files[$j]['priority'])) {
+
+                            $data['priority'] = $files[$j]['priority'];
+                            echo $data['priority']  ;
+                            Media::where('product_id', $product_id)->where('type', $type)->where('id', $files[$j]['id'])->update($data);
+
+                        }
+                        unset($mediaDataTemp[$i]);
+                        unset($filesTemp[$j]);
+                        // array_splice($filesTemp, $j, 1); // array remove at
+                        $result_number++;
+                        break;
                     }
                 }
             }
         }
-
-        // dd($mediaData, $mediaDataTemp);
+        // echo 'mediaDataTemp2 ' . count($mediaDataTemp) . '   ';
+        // remove destenition or row from table
         if (count($mediaDataTemp) > 0) {
             foreach ($mediaDataTemp as $data) {
                 try {
@@ -274,15 +278,16 @@ class ProductController extends Controller
                         $media->forcedelete();
                     }
                 } catch (Exception $e) {
-                    break;
+                    continue;
                     // return ($e->getMessage());
                 }
 
             }
         }
 
-        if (count($files) > 0) {
-            foreach ($files as $file) {
+        // add new to table
+        if (count($filesTemp) > 0) {
+            foreach ($filesTemp as $file) {
                 if (!empty($file['detail'])) {
 
                     $file_name = rand(1000, 9999) . '_' . $file['detail']->getClientOriginalName();
